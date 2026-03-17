@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0F1923">
+<title>SPOI VT — Portail CSP Phase 1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0F1923;--sur:#1A2535;--sur2:#243347;--sur3:#2E4060;--bdr:#2E4060;--bdr2:#3A5070;--blue:#1A6FE8;--green:#0D9E5C;--red:#D93025;--amb:#C97A00;--pur:#6C3FC5;--txt:#F0F4F8;--txt2:#8BA4C0;--txt3:#4A6080;--r:14px;--rs:8px}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;flex-shrink:0}
+.tb-brand{display:flex;align-items:center;gap:14px}
+.tb-logo{width:36px;height:36px;background:var(--blue);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff}
+.tb-name{font-size:16px;font-weight:700;color:var(--txt)}
+.tb-sub{font-size:11px;color:var(--txt2);margin-top:1px}
+.tb-status{display:flex;align-items:center;gap:6px;background:var(--sur2);border:1px solid var(--bdr2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;color:var(--txt2)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-user{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.tb-notif{position:relative;cursor:pointer;font-size:20px}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sur)}
+.alert-banner{background:linear-gradient(90deg,#B02018,#D93025);padding:8px 28px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.ab-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:16px;margin-left:auto}
+.scroll{flex:1;overflow-y:auto;padding:24px 28px}
+.page-hdr{margin-bottom:24px}
+.page-title{font-size:24px;font-weight:700;color:var(--txt);letter-spacing:-.3px;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--txt2)}
+.page-date{font-size:11px;color:var(--txt3);margin-top:4px}
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:28px}
+.kpi-card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.kpi-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 4px 20px rgba(26,111,232,.15)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kc-g::before{background:var(--green)}.kc-b::before{background:var(--blue)}.kc-r::before{background:var(--red)}.kc-a::before{background:var(--amb)}
+.kv{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.kl{font-size:11px;color:var(--txt2);font-weight:500}
+.kd{font-size:10px;font-weight:700;margin-top:6px}
+.kd.up{color:var(--green)}.kd.dn{color:var(--red)}.kd.neu{color:var(--txt3)}
+.k-trend{position:absolute;bottom:10px;right:12px;font-size:20px;opacity:.08}
+.sec-title{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.mod-card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s}
+.mod-card:hover{border-color:var(--bdr2);box-shadow:0 4px 24px rgba(0,0,0,.3);transform:translateY(-2px)}
+.mod-stripe{height:4px}
+.mod-body{padding:18px}
+.mod-icon{font-size:28px;margin-bottom:12px}
+.mod-num{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.mod-title{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.mod-desc{font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:14px}
+.mod-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.mod-stat{background:var(--sur2);border-radius:var(--rs);padding:4px 10px;font-size:10px;font-weight:700}
+.mod-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--bdr)}
+.mod-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.ms-dot{width:7px;height:7px;border-radius:50%}
+.ms-ok{color:var(--green)}.ms-ok .ms-dot{background:var(--green)}
+.ms-wip{color:var(--blue)}.ms-wip .ms-dot{background:var(--blue)}
+.ms-risk{color:var(--red)}.ms-risk .ms-dot{background:var(--red)}
+.mod-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:18px}
+.card-title{font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.ct-link{font-size:11px;color:var(--blue);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600}
+.jrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.jrow:last-child{border-bottom:none}
+.jtype{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;min-width:32px;text-align:center}
+.jt-lt{background:#1A2D50;color:#6BA3E8}.jt-vt{background:#0A2E1E;color:#4ade80}.jt-mes{background:#2E1A00;color:#F59E0B}
+.jlbl{flex:1;color:var(--txt);font-weight:500}
+.jdate{font-size:10px;color:var(--txt2);min-width:80px}
+.jstat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.js-ok{background:#0A2E1E;color:#4ade80}.js-av{background:#1A2D50;color:#6BA3E8}.js-risk{background:#2E0A0A;color:#F87171}
+.jdays{font-size:10px;font-weight:700;min-width:60px;text-align:right}
+.jd-ok{color:var(--green)}.jd-warn{color:var(--amb)}.jd-risk{color:var(--red)}
+.agent-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.agent-row:last-child{border-bottom:none}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.ag-name{flex:1;color:var(--txt);font-weight:500;font-size:12px}
+.ag-role{font-size:10px;color:var(--txt3);margin-left:4px}
+.ag-bar-bg{width:80px;height:5px;background:var(--sur3);border-radius:3px;overflow:hidden}
+.ag-bar-fill{height:5px;border-radius:3px}
+.ag-pct{font-size:10px;font-weight:700;min-width:32px;text-align:right}
+.sp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.sp-row:last-child{border-bottom:none}
+.sp-icon{font-size:16px;flex-shrink:0}
+.sp-body{flex:1}
+.sp-title{color:var(--txt);font-weight:600;font-size:12px}
+.sp-sub{font-size:10px;color:var(--txt3);margin-top:1px}
+.sp-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.spb-ok{background:#0A2E1E;color:#4ade80}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--sur);border:1px solid var(--bdr2);border-radius:var(--r);width:480px;max-height:85vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-title{font-size:17px;font-weight:700;color:var(--txt);margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--txt2);margin-bottom:18px}
+.mrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.mrow:last-child{border-bottom:none}
+.mk{color:var(--txt2)}.mv{font-weight:700;color:var(--txt);text-align:right;max-width:60%}
+.mbtn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">VT</div>
+    <div><div class="tb-name">SPOI VT — CSP Phase 1</div><div class="tb-sub">ONCF · Alstom / Ineo · Signalisation Casablanca</div></div>
+  </div>
+  <div class="tb-status"><div class="live-dot"></div>Connecté à SharePoint SIG Morocco</div>
+  <div class="tb-right">
+    <div class="tb-notif" onclick="openModal('alertes')">🔔<div class="notif-dot"></div></div>
+    <div class="tb-user">
+      <div class="tb-avatar">HO</div>
+      <div><div style="font-size:12px;color:var(--txt);font-weight:600">HMIDANI Othmane</div><div style="font-size:10px;color:var(--txt3)">Dir. Opérations</div></div>
+    </div>
+  </div>
+</div>
+<div class="alert-banner" id="abar">
+  <span>⚠</span><span>3 NCR critiques hors délai 5j · Jalons J04 et J05 à risque · M. Chakir surchargé 175%</span>
+  <button class="ab-close" onclick="document.getElementById('abar').style.display='none'">✕</button>
+</div>
+<div class="scroll">
+<div class="page-hdr">
+  <div class="page-title">Portail SPOI VT — Pilotage Opérationnel</div>
+  <div class="page-sub">Vue d'ensemble du projet · Toutes zones · CSP Phase 1 Signalisation</div>
+  <div class="page-date">Lundi 16 Mars 2026 · Semaine S#11 · ONCF / Alstom / Ineo</div>
+</div>
+<div class="kpi-strip">
+  <div class="kpi-card kc-g" onclick="openModal('conform')"><div class="k-trend">✓</div><div class="kv" style="color:var(--green)">78%</div><div class="kl">Taux de conformité</div><div class="kd up">↑ +4% vs S#10</div></div>
+  <div class="kpi-card kc-b" onclick="openModal('avance')"><div class="k-trend">▦</div><div class="kv" style="color:var(--blue)">56%</div><div class="kl">Avancement global</div><div class="kd dn">↓ −6% vs planning</div></div>
+  <div class="kpi-card kc-b" onclick="openModal('vt')"><div class="k-trend">◎</div><div class="kv" style="color:var(--blue)">142<span style="font-size:14px">/183</span></div><div class="kl">Fiches VT réalisées</div><div class="kd neu">41 restantes</div></div>
+  <div class="kpi-card kc-r" onclick="openModal('ncr')"><div class="k-trend">⊠</div><div class="kv" style="color:var(--red)">17</div><div class="kl">NCR ouvertes</div><div class="kd dn">3 critiques &gt;5j ⚠</div></div>
+  <div class="kpi-card kc-a" onclick="openModal('delai')"><div class="k-trend">⏱</div><div class="kv" style="color:var(--amb)">4.2j</div><div class="kl">Délai moyen NCR</div><div class="kd up">Objectif ≤5j ✓</div></div>
+  <div class="kpi-card kc-r" onclick="openModal('jalons')"><div class="k-trend">⚠</div><div class="kv" style="color:var(--red)">2</div><div class="kl">Jalons à risque</div><div class="kd dn">J04 −3j · J05 −8j</div></div>
+</div>
+<div class="sec-title">Modules de l'application SPOI VT</div>
+<div class="modules-grid">
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/index.html'"><div class="mod-stripe" style="background:#1A6FE8"></div><div class="mod-body"><div class="mod-icon">📱</div><div class="mod-num">Module 01</div><div class="mod-title">Collecte Terrain</div><div class="mod-desc">Fiches VT terrain · 5 étapes · photos · signature digitale · mode hors-ligne PWA</div><div class="mod-stats"><span class="mod-stat" style="color:var(--green)">142 fiches</span><span class="mod-stat" style="color:var(--blue)">PWA ✓</span><span class="mod-stat" style="color:var(--green)">SharePoint ✓</span></div><div class="mod-footer"><div class="mod-status ms-ok"><div class="ms-dot"></div>Actif · 5 agents<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/index.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module03.html'"><div class="mod-stripe" style="background:#D93025"></div><div class="mod-body"><div class="mod-icon">⚠</div><div class="mod-num">Module 03</div><div class="mod-title">NCR / Réserves</div><div class="mod-desc">Gestion non-conformités · délais contractuels 5j · alertes automatiques Power Automate</div><div class="mod-stats"><span class="mod-stat" style="color:var(--red)">17 ouvertes</span><span class="mod-stat" style="color:var(--red)">3 hors délai</span><span class="mod-stat" style="color:var(--green)">3 levées</span></div><div class="mod-footer"><div class="mod-status ms-risk"><div class="ms-dot"></div>3 critiques urgentes<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module03.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module04.html'"><div class="mod-stripe" style="background:#1A6FE8"></div><div class="mod-body"><div class="mod-icon">📅</div><div class="mod-num">Module 04</div><div class="mod-title">Master Planning</div><div class="mod-desc">Gantt Zone → Gare → Phase · import Excel contractuel · jalons LT/VT/MES</div><div class="mod-stats"><span class="mod-stat" style="color:var(--blue)">8 phases</span><span class="mod-stat" style="color:var(--amb)">Retard +5j</span><span class="mod-stat" style="color:var(--green)">SP0 ✓</span></div><div class="mod-footer"><div class="mod-status ms-wip"><div class="ms-dot"></div>56% avancement<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module04.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module05.html'"><div class="mod-stripe" style="background:#6C3FC5"></div><div class="mod-body"><div class="mod-icon">👥</div><div class="mod-num">Module 05</div><div class="mod-title">Ops Planning</div><div class="mod-desc">Calendrier agents · charge hebdomadaire · absences · projection 18 mois</div><div class="mod-stats"><span class="mod-stat" style="color:#6C3FC5">5 agents</span><span class="mod-stat" style="color:var(--red)">1 surchargé</span><span class="mod-stat" style="color:var(--amb)">2 absences S#12</span></div><div class="mod-footer"><div class="mod-status ms-wip"><div class="ms-dot"></div>S#11 · 23 VT affectées<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module05.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module06.html'"><div class="mod-stripe" style="background:linear-gradient(90deg,var(--green),var(--blue))"></div><div class="mod-body"><div class="mod-icon">📊</div><div class="mod-num">Module 06</div><div class="mod-title">Dashboard</div><div class="mod-desc">KPIs interactifs · vue globale/zone · courbe avancement · alertes temps réel</div><div class="mod-stats"><span class="mod-stat" style="color:var(--green)">78% conf.</span><span class="mod-stat" style="color:var(--blue)">6 KPIs</span><span class="mod-stat" style="color:var(--green)">Temps réel</span></div><div class="mod-footer"><div class="mod-status ms-ok"><div class="ms-dot"></div>Mis à jour S#11<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module06.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+  <div class="mod-card" onclick="window.location.href='https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module02.html'"><div class="mod-stripe" style="background:#4A5E74"></div><div class="mod-body"><div class="mod-icon">📄</div><div class="mod-num">Module 02</div><div class="mod-title">Reporting & Archives</div><div class="mod-desc">6 documents officiels MOA · Cahier VT · Avis achèvement · Certificat · DOE</div><div class="mod-stats"><span class="mod-stat" style="color:var(--txt2)">6 types</span><span class="mod-stat" style="color:var(--txt2)">PDF·Word·Excel</span><span class="mod-stat" style="color:var(--green)">8 archivés</span></div><div class="mod-footer"><div class="mod-status ms-ok"><div class="ms-dot"></div>8 documents générés<a href="https://alstomgroup.sharepoint.com/sites/SiteOperationsManagementSIGMorocco/Shared%20Documents/SPOI-VT/module02.html" onclick="event.stopPropagation()" style="background:#1A6FE8;color:#fff;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;text-decoration:none">Ouvrir →</a></div></div></div></div>
+</div>
+<div class="bottom-row">
+  <div class="card">
+    <div class="card-title">Jalons contractuels <span class="ct-link">Voir tout →</span></div>
+    <div class="jrow"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP0 — Casa-Port</span><span class="jdate">15-02-2026</span><span class="jstat js-ok">Atteint ✓</span><span class="jdays jd-ok">✓</span></div>
+    <div class="jrow"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP1.0 — Casa-Port</span><span class="jdate">30-03-2026</span><span class="jstat js-av">À venir</span><span class="jdays jd-ok">14j</span></div>
+    <div class="jrow"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP1.1 — Casa-Voyageurs</span><span class="jdate">30-04-2026</span><span class="jstat js-risk">Risque ⚠</span><span class="jdays jd-risk">−3j</span></div>
+    <div class="jrow"><span class="jtype jt-vt">VT</span><span class="jlbl">VT SP1.1 — Casa-Voyageurs</span><span class="jdate">15-05-2026</span><span class="jstat js-risk">Risque ⚠</span><span class="jdays jd-risk">−8j</span></div>
+    <div class="jrow"><span class="jtype jt-mes">MES</span><span class="jlbl">Mise en Service Phase 1</span><span class="jdate">31-03-2027</span><span class="jstat js-av">À venir</span><span class="jdays jd-ok">380j</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card">
+      <div class="card-title">Charge équipe S#11</div>
+      <div class="agent-row"><div class="av" style="background:#1A6FE8">BA</div><div style="flex:1"><span class="ag-name">M. Benali</span><span class="ag-role">CE</span></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:100%;background:var(--red)"></div></div><div class="ag-pct" style="color:var(--red)">15/12</div></div>
+      <div class="agent-row"><div class="av" style="background:#0D9E5C">ER</div><div style="flex:1"><span class="ag-name">M. Eddahbi</span><span class="ag-role">AVT</span></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:80%;background:var(--green)"></div></div><div class="ag-pct" style="color:var(--green)">8/10</div></div>
+      <div class="agent-row"><div class="av" style="background:#C97A00">FL</div><div style="flex:1"><span class="ag-name">Mme Fassi</span><span class="ag-role">AVT</span></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:80%;background:var(--green)"></div></div><div class="ag-pct" style="color:var(--green)">8/10</div></div>
+      <div class="agent-row"><div class="av" style="background:#D93025">CO</div><div style="flex:1"><span class="ag-name">M. Chakir</span><span class="ag-role">AJ</span></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:100%;background:var(--red)"></div></div><div class="ag-pct" style="color:var(--red)">14/8</div></div>
+      <div class="agent-row"><div class="av" style="background:#6C3FC5">AK</div><div style="flex:1"><span class="ag-name">M. Alami</span><span class="ag-role">RVT</span></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:67%;background:var(--green)"></div></div><div class="ag-pct" style="color:var(--green)">4/6</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Infrastructure SharePoint</div>
+      <div class="sp-row"><div class="sp-icon">📋</div><div class="sp-body"><div class="sp-title">FichesVT</div><div class="sp-sub">142 fiches · 16-03-2026</div></div><span class="sp-badge spb-ok">✓ Actif</span></div>
+      <div class="sp-row"><div class="sp-icon">⚠</div><div class="sp-body"><div class="sp-title">NCR_Reserves</div><div class="sp-sub">17 réserves ouvertes</div></div><span class="sp-badge spb-ok">✓ Actif</span></div>
+      <div class="sp-row"><div class="sp-icon">📅</div><div class="sp-body"><div class="sp-title">Planning_Phases</div><div class="sp-sub">8 phases · 3 jalons à risque</div></div><span class="sp-badge spb-ok">✓ Actif</span></div>
+      <div class="sp-row"><div class="sp-icon">⚡</div><div class="sp-body"><div class="sp-title">Power Automate</div><div class="sp-sub">SPOI_VT_Enregistrer_Fiche</div></div><span class="sp-badge spb-ok">✓ Actif</span></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-sub" id="m-sub"></div>
+    <div id="m-body"></div>
+    <button class="mbtn" onclick="document.getElementById('modal').classList.remove('open')">Fermer</button>
+  </div>
+</div>
+<script>
+var M={
+  mod01:{t:'Module 01 — Collecte Terrain',s:'PWA déployée sur SharePoint SIG Morocco',r:[['URL','…/Documents/SPOI-VT/index.html'],['Mode hors-ligne','Service Worker actif'],['Sync','Email → Power Automate → FichesVT'],['Agents actifs','5'],['Fiches aujourd\'hui','12'],['Dernière sync','16-03-2026 14h32']]},
+  mod02:{t:'Module 02 — Reporting & Archives',s:'6 types de documents officiels MOA',r:[['Documents','Cahier VT · Avis achèvement · Liste réserves'],['Formats','PDF · Word · Excel'],['Réf. MOA','MOA-Z-SE-SIG-NMQ-0001-01_V00'],['Archivés','8 documents']]},
+  mod03:{t:'Module 03 — NCR / Réserves',s:'Gestion des non-conformités',r:[['NCR ouvertes','17 (4 crit. · 10 min. · 3 en traitement)'],['Hors délai 5j','3 NCR critiques ⚠'],['Délai moyen','4.2 jours ouvrables'],['Alertes','Power Automate → Email'],['Taux levée','15%']]},
+  mod04:{t:'Module 04 — Master Planning',s:'Gantt Zone → Gare → Phase → Tâche',r:[['Phases actives','8 (3 terminées · 4 en cours)'],['Avancement','56% (objectif 62%)'],['Jalons risque','J04 −3j · J05 −8j'],['Seuil alerte','5j orange · 10j rouge']]},
+  mod05:{t:'Module 05 — Ops Planning',s:'Gestion des équipes et charge',r:[['Agents','5 (RVT·CE·AVT·AVT·AJ)'],['VT S#11','23 affectées / 46 capacité'],['Surchargés','M. Chakir 175%'],['Absences S#12','2 (Formation · Congé)'],['Projection','183 VT / 18 mois']]},
+  mod06:{t:'Module 06 — Dashboard',s:'KPIs interactifs temps réel',r:[['Conformité','78% (+4% S#10)'],['Avancement','56% (−6% planning)'],['Vues','Global · Par zone/gare'],['Graphiques','8 graphiques']]},
+  alertes:{t:'Alertes actives',s:'Points critiques à traiter en priorité',r:[['🔴 NCR-013','8j dépassé — Recâblage CAB-F03'],['🔴 NCR-014','5j dépassé — LED S-185'],['🔴 NCR-012','8j dépassé — Cote pose EB-E02'],['⚠ Jalon J04','Retard −3j LT Casa-Voyageurs'],['⚠ Jalon J05','Retard −8j VT Casa-Voyageurs'],['⚠ M. Chakir','Surchargé 175%']]},
+  conform:{t:'Taux de conformité',s:'Par gare et équipement',r:[['Global','78%'],['Casa-Port','82%'],['Casa-Voyageurs','64%'],['Mécanismes','95%'],['CDV ITE','72%']]},
+  avance:{t:'Avancement vs planning',s:'',r:[['SP0','100% ✓'],['SP1.0','72%'],['SP1.1','40%'],['Écart global','−6%']]},
+  vt:{t:'Fiches VT',s:'',r:[['Réalisées','142/183'],['Conformes','110 (78%)'],['NC','17 (12%)'],['En cours','15'],['À faire','41']]},
+  ncr:{t:'NCR',s:'',r:[['Critiques ouv.','4 (2 hors délai)'],['Mineures ouv.','10 (3 hors délai)'],['Levées','3'],['Délai moy.','4.2j']]},
+  delai:{t:'Délais NCR',s:'',r:[['Moy. global','4.2j'],['Critiques','3.8j (≤5j ✓)'],['Mineures','6.1j (≤10j ✓)']]},
+  jalons:{t:'Jalons à risque',s:'',r:[['J04 LT','30-04-2026 · Retard −3j'],['J05 VT','15-05-2026 · Retard −8j'],['Cause','NCR-013 et NCR-016'],['Action','Lever NCR-013 (Benali)']]},
+};
+function openModal(k){var c=M[k];if(!c)return;document.getElementById('m-title').textContent=c.t;document.getElementById('m-sub').textContent=c.s;document.getElementById('m-body').innerHTML=c.r.map(function(r){return'<div class="mrow"><span class="mk">'+r[0]+'</span><span class="mv">'+r[1]+'</span></div>';}).join('');document.getElementById('modal').classList.add('open');}
+</script>
+
+</body>
+</html>
