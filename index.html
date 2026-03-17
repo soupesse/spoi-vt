@@ -382,32 +382,39 @@ function syncPending(){
 function envoyerEmail(){
   if(!currentFiche)return;
   var f=currentFiche;
-  var subject='[SPOI-VT] Nouvelle fiche '+f.id+' — '+f.statut+' — '+f.equip;
+  
+  // JSON structuré pour extraction automatique par Power Automate
+  var jsonData = {
+    "Titre": f.id,
+    "Equipement": f.equip,
+    "Zone": f.zone,
+    "Gare": f.gare,
+    "Voie": f.voie,
+    "PK": f.pk,
+    "IDTerrain": f.terrain,
+    "Verificateur": f.verif,
+    "Statut": f.statut,
+    "NbPointsC": f.c,
+    "NbPointsNC": f.nc,
+    "NbPointsNA": f.na,
+    "Observations": f.obs||"",
+    "DateFiche": f.date+" "+f.heure
+  };
+  
+  var subject='[SPOI-VT] '+f.id+' | '+f.statut+' | '+f.equip+' | '+f.gare;
   var body=
-    'NOUVELLE FICHE VT — CSP Phase 1\n'+
-    '================================\n\n'+
+    'SPOI-VT-DATA-START\n'+
+    JSON.stringify(jsonData, null, 2)+'\n'+
+    'SPOI-VT-DATA-END\n\n'+
+    '--- Résumé lisible ---\n'+
     'N° Fiche: '+f.id+'\n'+
-    'Date: '+f.date+' à '+f.heure+'\n'+
-    'Statut: '+f.statut+'\n\n'+
-    'LOCALISATION\n'+
-    'Zone: '+f.zone+'\n'+
-    'Gare: '+f.gare+'\n'+
-    'PK: '+f.pk+'\n'+
-    'ID Terrain: '+f.terrain+'\n'+
-    'Voie: '+f.voie+'\n\n'+
-    'ÉQUIPEMENT\n'+
-    'Type: '+f.equip+'\n\n'+
-    'VÉRIFICATEUR\n'+
-    'Nom: '+f.verif+'\n\n'+
-    'RÉSULTATS\n'+
-    'Points conformes: '+f.c+'\n'+
-    'Points non-conformes: '+f.nc+'\n'+
-    'Points N/A: '+f.na+'\n'+
-    'Total points: '+f.tot+'\n\n'+
-    'OBSERVATIONS\n'+(f.obs||'Aucune')+'\n\n'+
-    '================================\n'+
-    'Envoyé depuis SPOI VT Module 01\n'+
-    'ONCF · Alstom / Ineo · CSP Phase 1';
+    'Statut: '+f.statut+'\n'+
+    'Équipement: '+f.equip+'\n'+
+    'Zone: '+f.zone+' → '+f.gare+'\n'+
+    'PK: '+f.pk+' · Voie: '+f.voie+'\n'+
+    'Vérificateur: '+f.verif+'\n'+
+    'Résultat: '+f.c+' C · '+f.nc+' NC · '+f.na+' NA\n'+
+    'Date: '+f.date+' à '+f.heure;
 
   var mailto='mailto:'+SP_EMAIL+
     '?subject='+encodeURIComponent(subject)+
