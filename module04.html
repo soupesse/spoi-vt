@@ -1,21 +1,220 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>SPOI VT — Module 04 · Planning</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.topbar{background:#1A6FE8;padding:10px 16px;display:flex;align-items:center;gap:12px}.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none}.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7;margin-top:1px}.content{padding:16px;max-width:800px;margin:0 auto}.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}.card-hdr{padding:12px 16px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;align-items:center;justify-content:space-between}.card-title{font-size:12px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}.phase-row{padding:12px 16px;border-bottom:1px solid #EEF2F7;display:flex;align-items:center;gap:12px}.phase-row:last-child{border-bottom:none}.ph-info{flex:1}.ph-name{font-size:13px;font-weight:700;margin-bottom:3px}.ph-meta{font-size:11px;color:#7A90A4}.ph-bar-bg{width:120px;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden}.ph-bar-fill{height:6px;border-radius:3px}.ph-pct{font-size:11px;font-weight:700;min-width:36px;text-align:right}.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}.bd{background:#E6F9F1;color:#0A7A47}.bw{background:#EBF2FF;color:#1558C0}.br{background:#FEE8E6;color:#B02018}.bt{background:#F0F4F8;color:#7A90A4}.jalon-row{padding:10px 16px;border-bottom:1px solid #EEF2F7;display:flex;align-items:center;gap:10px;font-size:12px}.jalon-row:last-child{border-bottom:none}.jtype{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;min-width:30px;text-align:center}.jt-lt{background:#EBF2FF;color:#1558C0}.jt-vt{background:#E6F9F1;color:#0A7A47}.jt-mes{background:#FFF4E0;color:#9E5F00}.jlbl{flex:1;font-weight:500}.jdate{font-size:10px;color:#7A90A4}.jstat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}.js-ok{background:#E6F9F1;color:#0A7A47}.js-av{background:#EBF2FF;color:#1558C0}.js-risk{background:#FEE8E6;color:#B02018}</style></head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT — Module 04 · Planning</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.topbar{background:#1A6FE8;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7}
+.live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#fff}
+.dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.content{padding:14px;max-width:900px;margin:0 auto}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
+.kv{font-size:20px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
+.kg{color:#0D9E5C}.kb{color:#1A6FE8}.ka{color:#C97A00}.kr{color:#D93025}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-hdr{padding:10px 14px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:11px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.phase-row{padding:12px 14px;border-bottom:1px solid #EEF2F7;display:flex;align-items:center;gap:12px}
+.phase-row:last-child{border-bottom:none}
+.ph-info{flex:1}
+.ph-name{font-size:13px;font-weight:700;margin-bottom:3px}
+.ph-meta{font-size:11px;color:#7A90A4}
+.bar-bg{width:120px;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden;flex-shrink:0}
+.bar-fill{height:6px;border-radius:3px}
+.ph-pct{font-size:11px;font-weight:700;min-width:36px;text-align:right}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0}
+.bd{background:#E6F9F1;color:#0A7A47}.bw{background:#EBF2FF;color:#1558C0}
+.br{background:#FEE8E6;color:#B02018}.bt{background:#F0F4F8;color:#7A90A4}
+.jalon-row{padding:10px 14px;border-bottom:1px solid #EEF2F7;display:flex;align-items:center;gap:10px;font-size:12px}
+.jalon-row:last-child{border-bottom:none}
+.jtype{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;min-width:32px;text-align:center;flex-shrink:0}
+.jt-lt{background:#EBF2FF;color:#1558C0}.jt-vt{background:#E6F9F1;color:#0A7A47}
+.jt-mes{background:#FFF4E0;color:#9E5F00}.jt-rec{background:#F0F4F8;color:#4A5E74}
+.jlbl{flex:1;font-weight:500}
+.jdate{font-size:10px;color:#7A90A4;min-width:80px}
+.jstat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;flex-shrink:0}
+.js-ok{background:#E6F9F1;color:#0A7A47}.js-av{background:#EBF2FF;color:#1558C0}
+.js-risk{background:#FEE8E6;color:#B02018}
+.jdays{font-size:10px;font-weight:700;min-width:60px;text-align:right}
+.jd-ok{color:#0D9E5C}.jd-warn{color:#C97A00}.jd-risk{color:#D93025}
+.empty{text-align:center;padding:24px;color:#7A90A4;font-size:12px}
+.edit-btn{background:#1A6FE8;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:400px}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.form-row{margin-bottom:12px}
+.form-row label{font-size:11px;font-weight:700;color:#4A5E74;display:block;margin-bottom:4px}
+.form-row input,.form-row select{width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none}
+.form-row input:focus,.form-row select:focus{border-color:#1A6FE8}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.btn-save{flex:1;background:#1A6FE8;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-cancel{background:#EEF2F7;color:#4A5E74;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer}
+</style>
+</head>
 <body>
-<div class="topbar"><a class="back-btn" href="https://soupesse.github.io/spoi-vt/portail.html" target="_blank">← Portail</a><div class="tb-info"><div class="tb-title">Module 04 — Master Planning</div><div class="tb-sub">Zone Casablanca · CSP Phase 1 · Avancement 56%</div></div></div>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">← Portail</a>
+    <div class="tb-info"><div class="tb-title">Module 04 — Master Planning</div><div class="tb-sub">Temps réel · Supabase</div></div>
+  </div>
+  <div class="live"><div class="dot"></div>Live</div>
+</div>
 <div class="content">
-<div class="card">
-<div class="card-hdr"><span class="card-title">Phases & Avancement</span><span style="font-size:11px;color:#1A6FE8;font-weight:700">56% global</span></div>
-<div class="phase-row"><div class="ph-info"><div class="ph-name">SP0 — Installation base CAS</div><div class="ph-meta">Casa-Port · 05-01-2026 → 15-02-2026</div></div><div class="ph-bar-bg"><div class="ph-bar-fill" style="width:100%;background:#0D9E5C"></div></div><div class="ph-pct" style="color:#0D9E5C">100%</div><span class="badge bd">Terminé</span></div>
-<div class="phase-row"><div class="ph-info"><div class="ph-name">SP1.0 — VT Casa-Port</div><div class="ph-meta">Casa-Port · 10-02-2026 → 30-03-2026 ⚠ Retard</div></div><div class="ph-bar-bg"><div class="ph-bar-fill" style="width:72%;background:#1A6FE8"></div></div><div class="ph-pct" style="color:#1A6FE8">72%</div><span class="badge bw">En cours</span></div>
-<div class="phase-row"><div class="ph-info"><div class="ph-name">SP1.1 — VT Casa-Voyageurs</div><div class="ph-meta">Casa-Voyageurs · 15-03-2026 → 30-04-2026</div></div><div class="ph-bar-bg"><div class="ph-bar-fill" style="width:40%;background:#D93025"></div></div><div class="ph-pct" style="color:#D93025">40%</div><span class="badge br">Risque</span></div>
-<div class="phase-row"><div class="ph-info"><div class="ph-name">SP1.2 — VT Ain Sebaa</div><div class="ph-meta">Ain Sebaa · 20-04-2026 → 15-06-2026</div></div><div class="ph-bar-bg"><div class="ph-bar-fill" style="width:0%;background:#7A90A4"></div></div><div class="ph-pct" style="color:#7A90A4">0%</div><span class="badge bt">À faire</span></div>
-<div class="phase-row"><div class="ph-info"><div class="ph-name">SP1.5 — Essais intégration</div><div class="ph-meta">Casa-Port · 01-10-2026 → 15-12-2026</div></div><div class="ph-bar-bg"><div class="ph-bar-fill" style="width:0%;background:#7A90A4"></div></div><div class="ph-pct" style="color:#7A90A4">0%</div><span class="badge bt">À faire</span></div>
+  <div class="krow">
+    <div class="ki"><div class="kv kg" id="k-av">-</div><div class="kl">Avancement global</div></div>
+    <div class="ki"><div class="kv kb" id="k-vt">-</div><div class="kl">VT réalisées / prévues</div></div>
+    <div class="ki"><div class="kv ka" id="k-enc">-</div><div class="kl">Phases en cours</div></div>
+    <div class="ki"><div class="kv kr" id="k-risk">-</div><div class="kl">Jalons à risque</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Phases & Avancement</span>
+      <button class="edit-btn" onclick="openModal()">+ Mettre à jour</button>
+    </div>
+    <div id="phase-list"><div class="empty">⏳ Chargement...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">Jalons contractuels</span></div>
+    <div id="jalon-list"><div class="empty">⏳ Chargement...</div></div>
+  </div>
 </div>
-<div class="card">
-<div class="card-hdr"><span class="card-title">Jalons contractuels</span></div>
-<div class="jalon-row"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP0 — Casa-Port</span><span class="jdate">15-02-2026</span><span class="jstat js-ok">Atteint ✓</span></div>
-<div class="jalon-row"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP1.0 — Casa-Port</span><span class="jdate">30-03-2026</span><span class="jstat js-av">À venir · 14j</span></div>
-<div class="jalon-row"><span class="jtype jt-lt">LT</span><span class="jlbl">LT SP1.1 — Casa-Voyageurs</span><span class="jdate">30-04-2026</span><span class="jstat js-risk">Risque ⚠ −3j</span></div>
-<div class="jalon-row"><span class="jtype jt-vt">VT</span><span class="jlbl">VT SP1.1 — Casa-Voyageurs</span><span class="jdate">15-05-2026</span><span class="jstat js-risk">Risque ⚠ −8j</span></div>
-<div class="jalon-row"><span class="jtype jt-mes">MES</span><span class="jlbl">Mise en Service Phase 1</span><span class="jdate">31-03-2027</span><span class="jstat js-av">À venir · 380j</span></div>
+
+<!-- Modal mise à jour avancement -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>Mettre à jour l'avancement</h3>
+    <div class="form-row">
+      <label>Phase</label>
+      <select id="m-phase"></select>
+    </div>
+    <div class="form-row">
+      <label>% Avancement</label>
+      <input type="number" id="m-pct" min="0" max="100" placeholder="0-100">
+    </div>
+    <div class="form-row">
+      <label>VT réalisées</label>
+      <input type="number" id="m-vt" min="0" placeholder="Nombre">
+    </div>
+    <div class="form-row">
+      <label>Statut</label>
+      <select id="m-statut">
+        <option>À faire</option>
+        <option>En cours</option>
+        <option>Terminé</option>
+        <option>Risque</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="savePhase()">Enregistrer</button>
+    </div>
+  </div>
 </div>
-</div></body></html>
+
+<script>
+var SB_URL='https://kkixktqinfxlkaolslvv.supabase.co';
+var SB_KEY='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var phases=[];
+
+function load(){
+  Promise.all([
+    fetch(SB_URL+'/rest/v1/planning_phases?order=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/jalons?order=date_contractuelle',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    phases=res[0]||[];
+    var jalons=res[1]||[];
+    renderPhases(phases);
+    renderJalons(jalons);
+    updateKPIs(phases,jalons);
+  });
+}
+
+function updateKPIs(phases,jalons){
+  var lvl1=phases.filter(function(p){return p.niveau===1;});
+  var avgAv=lvl1.length?Math.round(lvl1.reduce(function(s,p){return s+p.pct_avancement;},0)/lvl1.length):0;
+  var totVT=lvl1.reduce(function(s,p){return s+p.nb_vt_prevues;},0);
+  var realVT=lvl1.reduce(function(s,p){return s+p.nb_vt_realisees;},0);
+  var enc=phases.filter(function(p){return p.statut==='En cours';}).length;
+  var risk=jalons.filter(function(j){return j.statut==='Risque';}).length;
+  document.getElementById('k-av').textContent=avgAv+'%';
+  document.getElementById('k-vt').textContent=realVT+'/'+totVT;
+  document.getElementById('k-enc').textContent=enc;
+  document.getElementById('k-risk').textContent=risk;
+}
+
+function renderPhases(data){
+  if(!data.length){document.getElementById('phase-list').innerHTML='<div class="empty">Aucune phase</div>';return;}
+  var html=data.map(function(p){
+    var pct=p.pct_avancement||0;
+    var color=p.statut==='Terminé'?'#0D9E5C':p.statut==='Risque'?'#D93025':pct>=50?'#1A6FE8':'#C97A00';
+    var cls=p.statut==='Terminé'?'bd':p.statut==='Risque'?'br':p.statut==='En cours'?'bw':'bt';
+    var pad=p.niveau===2?'padding-left:28px':'';
+    return '<div class="phase-row" style="'+pad+'">'+
+      '<div class="ph-info">'+
+        '<div class="ph-name">'+(p.libelle||p.id_phase)+'</div>'+
+        '<div class="ph-meta">'+(p.gare||'—')+' · '+(p.date_debut_contrat||'—')+' → '+(p.date_fin_contrat||'—')+' · Resp: '+(p.responsable||'—')+'</div>'+
+      '</div>'+
+      '<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<span class="ph-pct" style="color:'+color+'">'+pct+'%</span>'+
+      '<span class="badge '+cls+'">'+p.statut+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('phase-list').innerHTML=html;
+}
+
+function renderJalons(data){
+  if(!data.length){document.getElementById('jalon-list').innerHTML='<div class="empty">Aucun jalon</div>';return;}
+  var html=data.map(function(j){
+    var jt=j.type_jalon||'LT';
+    var jtCls='jt-'+jt.toLowerCase();
+    var stCls=j.statut==='Atteint'?'js-ok':j.statut==='Risque'?'js-risk':'js-av';
+    var days=j.jours_restants||0;
+    var daysCls=days<0?'jd-risk':days<14?'jd-warn':'jd-ok';
+    var daysTxt=j.statut==='Atteint'?'✓':days<0?Math.abs(days)+'j dépassé':days+'j';
+    return '<div class="jalon-row">'+
+      '<span class="jtype '+jtCls+'">'+jt+'</span>'+
+      '<span class="jlbl">'+(j.libelle||'—')+'</span>'+
+      '<span class="jdate">'+(j.date_contractuelle||'—')+'</span>'+
+      '<span class="jstat '+stCls+'">'+(j.statut||'—')+'</span>'+
+      '<span class="jdays '+daysCls+'">'+daysTxt+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('jalon-list').innerHTML=html;
+}
+
+function openModal(){
+  var sel=document.getElementById('m-phase');
+  sel.innerHTML=phases.map(function(p){return '<option value="'+p.id+'">'+p.libelle+'</option>';}).join('');
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function savePhase(){
+  var phaseId=document.getElementById('m-phase').value;
+  var pct=parseInt(document.getElementById('m-pct').value)||0;
+  var vt=parseInt(document.getElementById('m-vt').value)||0;
+  var statut=document.getElementById('m-statut').value;
+  
+  fetch(SB_URL+'/rest/v1/planning_phases?id=eq.'+phaseId,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body:JSON.stringify({pct_avancement:pct,nb_vt_realisees:vt,statut:statut})
+  }).then(function(){
+    closeModal();
+    load();
+  });
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body></html>

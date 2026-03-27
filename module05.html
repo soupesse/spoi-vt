@@ -1,19 +1,197 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>SPOI VT — Module 05 · Ops Planning</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.topbar{background:#6C3FC5;padding:10px 16px;display:flex;align-items:center;gap:12px}.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7;margin-top:1px}.content{padding:16px;max-width:800px;margin:0 auto}.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}.kv{font-size:22px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}.kp{color:#6C3FC5}.kr{color:#D93025}.ka{color:#C97A00}.kg{color:#0D9E5C}.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}.card-hdr{padding:12px 16px;background:#EEF2F7;border-bottom:1px solid #C8D5E3}.card-title{font-size:12px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}.agent-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #EEF2F7}.agent-row:last-child{border-bottom:none}.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}.ag-name{flex:1;font-size:13px;font-weight:600}.ag-role{font-size:10px;color:#7A90A4;margin-top:1px}.ag-bar-bg{width:100px;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden}.ag-bar-fill{height:6px;border-radius:3px}.ag-val{font-size:11px;font-weight:700;min-width:36px;text-align:right}.abs-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #EEF2F7;font-size:12px}.abs-row:last-child{border-bottom:none}.abs-type{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}.at-c{background:#EBF2FF;color:#1558C0}.at-f{background:#F0EBFF;color:#5a32a3}.at-m{background:#FEE8E6;color:#B02018}</style></head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT — Module 05 · Ops Planning</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.topbar{background:#6C3FC5;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7}
+.live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#fff}
+.dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.content{padding:14px;max-width:900px;margin:0 auto}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
+.kv{font-size:20px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
+.kp{color:#6C3FC5}.kr{color:#D93025}.ka{color:#C97A00}.kg{color:#0D9E5C}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-hdr{padding:10px 14px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:11px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.agent-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #EEF2F7}
+.agent-row:last-child{border-bottom:none}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.ag-info{flex:1}
+.ag-name{font-size:13px;font-weight:600;margin-bottom:1px}
+.ag-role{font-size:10px;color:#7A90A4}
+.bar-bg{width:100px;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden;flex-shrink:0}
+.bar-fill{height:6px;border-radius:3px}
+.ag-val{font-size:11px;font-weight:700;min-width:36px;text-align:right}
+.abs-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #EEF2F7;font-size:12px}
+.abs-row:last-child{border-bottom:none}
+.abs-type{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.at-f{background:#E6F9F1;color:#0A7A47}.at-c{background:#EBF2FF;color:#1558C0}.at-m{background:#FEE8E6;color:#B02018}
+.abs-name{flex:1;font-weight:600}
+.abs-date{font-size:10px;color:#7A90A4}
+.add-btn{background:#6C3FC5;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.empty{text-align:center;padding:24px;color:#7A90A4;font-size:12px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:380px}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.form-row{margin-bottom:12px}
+.form-row label{font-size:11px;font-weight:700;color:#4A5E74;display:block;margin-bottom:4px}
+.form-row input,.form-row select{width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.btn-save{flex:1;background:#6C3FC5;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-cancel{background:#EEF2F7;color:#4A5E74;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer}
+</style>
+</head>
 <body>
-<div class="topbar"><a class="back-btn" href="https://soupesse.github.io/spoi-vt/portail.html" target="_blank">← Portail</a><div class="tb-info"><div class="tb-title">Module 05 — Ops Planning</div><div class="tb-sub">Semaine S#11 · 16-20 Mars 2026</div></div></div>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">← Portail</a>
+    <div class="tb-info"><div class="tb-title">Module 05 — Ops Planning</div><div class="tb-sub">Équipe & charge · Temps réel</div></div>
+  </div>
+  <div class="live"><div class="dot"></div>Live</div>
+</div>
 <div class="content">
-<div class="krow"><div class="ki"><div class="kv kp">5</div><div class="kl">Agents actifs</div></div><div class="ki"><div class="kv kr">23</div><div class="kl">VT S#11</div></div><div class="ki"><div class="kv kr">1</div><div class="kl">Surchargé</div></div><div class="ki"><div class="kv ka">2</div><div class="kl">Absences</div></div></div>
-<div class="card">
-<div class="card-hdr"><span class="card-title">Charge agents — S#11</span></div>
-<div class="agent-row"><div class="av" style="background:#1A6FE8">BA</div><div style="flex:1"><div class="ag-name">M. Benali Ahmed</div><div class="ag-role">Chef d'Équipe · Max 12 VT/sem</div></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:100%;background:#D93025"></div></div><div class="ag-val" style="color:#D93025">15/12 ⚠</div></div>
-<div class="agent-row"><div class="av" style="background:#0D9E5C">ER</div><div style="flex:1"><div class="ag-name">M. Eddahbi Rachid</div><div class="ag-role">Agent VT · Max 10 VT/sem</div></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:80%;background:#0D9E5C"></div></div><div class="ag-val" style="color:#0D9E5C">8/10</div></div>
-<div class="agent-row"><div class="av" style="background:#C97A00">FL</div><div style="flex:1"><div class="ag-name">Mme Fassi Leila</div><div class="ag-role">Agent VT · Max 10 VT/sem</div></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:80%;background:#0D9E5C"></div></div><div class="ag-val" style="color:#0D9E5C">8/10</div></div>
-<div class="agent-row"><div class="av" style="background:#D93025">CO</div><div style="flex:1"><div class="ag-name">M. Chakir Omar</div><div class="ag-role">Agent Junior · Max 8 VT/sem</div></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:100%;background:#D93025"></div></div><div class="ag-val" style="color:#D93025">14/8 ⚠</div></div>
-<div class="agent-row"><div class="av" style="background:#6C3FC5">AK</div><div style="flex:1"><div class="ag-name">M. Alami Karim</div><div class="ag-role">Resp. VT · Max 6 VT/sem</div></div><div class="ag-bar-bg"><div class="ag-bar-fill" style="width:67%;background:#0D9E5C"></div></div><div class="ag-val" style="color:#0D9E5C">4/6</div></div>
+  <div class="krow">
+    <div class="ki"><div class="kv kp" id="k-ag">-</div><div class="kl">Agents actifs</div></div>
+    <div class="ki"><div class="kv kr" id="k-sur">-</div><div class="kl">Surchargés</div></div>
+    <div class="ki"><div class="kv ka" id="k-abs">-</div><div class="kl">Absences à venir</div></div>
+    <div class="ki"><div class="kv kg" id="k-cap">-</div><div class="kl">Capacité sem.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Charge agents — Semaine courante</span>
+    </div>
+    <div id="agent-list"><div class="empty">⏳ Chargement...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Absences à venir</span>
+      <button class="add-btn" onclick="openModal()">+ Ajouter</button>
+    </div>
+    <div id="abs-list"><div class="empty">⏳ Chargement...</div></div>
+  </div>
 </div>
-<div class="card">
-<div class="card-hdr"><span class="card-title">Absences à venir</span></div>
-<div class="abs-row"><div class="av" style="background:#0D9E5C;width:26px;height:26px;font-size:9px">ER</div><span style="flex:1;font-weight:600">M. Eddahbi Rachid</span><span class="abs-type at-f">Formation</span><span style="font-size:11px;color:#7A90A4">19-20 Mars 2026</span></div>
-<div class="abs-row"><div class="av" style="background:#C97A00;width:26px;height:26px;font-size:9px">FL</div><span style="flex:1;font-weight:600">Mme Fassi Leila</span><span class="abs-type at-c">Congé</span><span style="font-size:11px;color:#7A90A4">27-31 Mars 2026</span></div>
+
+<!-- Modal absence -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>Nouvelle absence</h3>
+    <div class="form-row"><label>Agent</label><select id="m-agent"></select></div>
+    <div class="form-row"><label>Type</label>
+      <select id="m-type"><option>Congé</option><option>Formation</option><option>Maladie</option><option>Mission</option></select>
+    </div>
+    <div class="form-row"><label>Date début</label><input type="date" id="m-deb"></div>
+    <div class="form-row"><label>Date fin</label><input type="date" id="m-fin"></div>
+    <div class="form-row"><label>Motif</label><input type="text" id="m-motif" placeholder="Motif..."></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="saveAbsence()">Enregistrer</button>
+    </div>
+  </div>
 </div>
-</div></body></html>
+
+<script>
+var SB_URL='https://kkixktqinfxlkaolslvv.supabase.co';
+var SB_KEY='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var COLORS=['#1A6FE8','#0D9E5C','#C97A00','#D93025','#6C3FC5'];
+var agentsData=[];
+
+function load(){
+  Promise.all([
+    fetch(SB_URL+'/rest/v1/agents?actif=eq.true&order=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/affectations?semaine=eq.S%2311',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/absences?order=date_debut',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    agentsData=res[0]||[];
+    var affectations=res[1]||[];
+    var absences=res[2]||[];
+    renderAgents(agentsData, affectations);
+    renderAbsences(absences);
+    updateKPIs(agentsData, affectations, absences);
+  });
+}
+
+function updateKPIs(agents, affectations, absences){
+  var surcharges=0;
+  var totalCap=0;
+  agents.forEach(function(a){
+    var aff=affectations.find(function(x){return x.id_agent===a.id_agent;});
+    var vt=aff?aff.nb_vt:0;
+    if(vt>a.max_vt_semaine)surcharges++;
+    totalCap+=a.max_vt_semaine;
+  });
+  document.getElementById('k-ag').textContent=agents.length;
+  document.getElementById('k-sur').textContent=surcharges;
+  document.getElementById('k-abs').textContent=absences.length;
+  document.getElementById('k-cap').textContent=totalCap+' VT/sem';
+}
+
+function renderAgents(agents, affectations){
+  var html=agents.map(function(a,i){
+    var aff=affectations.find(function(x){return x.id_agent===a.id_agent;});
+    var vt=aff?aff.nb_vt:0;
+    var max=a.max_vt_semaine||10;
+    var pct=Math.min(vt/max*100,100);
+    var color=vt>max?'#D93025':vt>=max*0.9?'#C97A00':'#0D9E5C';
+    var initials=(a.nom||'').split(' ').map(function(w){return w[0];}).slice(0,2).join('');
+    return '<div class="agent-row">'+
+      '<div class="av" style="background:'+COLORS[i%COLORS.length]+'">'+initials+'</div>'+
+      '<div class="ag-info"><div class="ag-name">'+(a.nom||'—')+'</div><div class="ag-role">'+(a.role||'—')+' · Max '+max+' VT/sem</div></div>'+
+      '<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<span class="ag-val" style="color:'+color+'">'+vt+'/'+max+(vt>max?' ⚠':'')+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('agent-list').innerHTML=html||'<div class="empty">Aucun agent</div>';
+}
+
+function renderAbsences(absences){
+  if(!absences.length){document.getElementById('abs-list').innerHTML='<div class="empty">✅ Aucune absence planifiée</div>';return;}
+  var html=absences.map(function(a){
+    var typeCls=a.type_absence==='Formation'?'at-f':a.type_absence==='Congé'?'at-c':'at-m';
+    return '<div class="abs-row">'+
+      '<span class="abs-type '+typeCls+'">'+(a.type_absence||'—')+'</span>'+
+      '<span class="abs-name">'+(a.nom_agent||'—')+'</span>'+
+      '<span class="abs-date">'+(a.date_debut||'—')+' → '+(a.date_fin||'—')+' ('+( a.nb_jours||'?')+'j)</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('abs-list').innerHTML=html;
+}
+
+function openModal(){
+  document.getElementById('m-agent').innerHTML=agentsData.map(function(a){return '<option value="'+a.id_agent+'|'+a.nom+'">'+a.nom+'</option>';}).join('');
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function saveAbsence(){
+  var agVal=document.getElementById('m-agent').value.split('|');
+  var deb=document.getElementById('m-deb').value;
+  var fin=document.getElementById('m-fin').value;
+  var jours=deb&&fin?Math.round((new Date(fin)-new Date(deb))/(1000*60*60*24))+1:1;
+  var data={
+    id_agent:agVal[0], nom_agent:agVal[1],
+    type_absence:document.getElementById('m-type').value,
+    date_debut:deb, date_fin:fin, nb_jours:jours,
+    motif:document.getElementById('m-motif').value,
+    approuve:false
+  };
+  fetch(SB_URL+'/rest/v1/absences',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body:JSON.stringify(data)
+  }).then(function(){closeModal();load();});
+}
+
+load();
+setInterval(load,30000);
+</script>
+</body></html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT — Admin Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0F1923;--sur:#1A2535;--sur2:#243347;--bdr:#2E4060;--blue:#1A6FE8;--green:#0D9E5C;--red:#D93025;--amb:#C97A00;--txt:#F0F4F8;--txt2:#8BA4C0;--txt3:#4A6080;--r:12px}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.topbar{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:54px}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}
+.tb-name{font-size:14px;font-weight:700;color:var(--txt)}
+.tb-sub{font-size:10px;color:var(--txt2)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(13,158,92,.2);border:1px solid rgba(13,158,92,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#4ade80}
+.dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.back-btn{background:var(--sur2);border:1px solid var(--bdr);color:var(--txt2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;text-decoration:none}
+.content{padding:16px;max-width:1100px;margin:0 auto}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--txt2);margin-bottom:16px}
+.krow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.ki{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;position:relative;overflow:hidden}
+.ki::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ki.cg::before{background:var(--green)}.ki.cb::before{background:var(--blue)}
+.ki.cr::before{background:var(--red)}.ki.ca::before{background:var(--amb)}
+.kv{font-size:24px;font-weight:700;line-height:1;margin-bottom:3px}
+.kl{font-size:10px;color:var(--txt2)}
+.kd{font-size:10px;font-weight:700;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.card-hdr{padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
+.ct-sub{font-size:10px;color:var(--txt3)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--txt2);border-bottom:1px solid var(--bdr);background:var(--sur2)}
+td{padding:8px 12px;border-bottom:1px solid var(--bdr);color:var(--txt)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(26,111,232,.05)}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px}
+.bc{background:#2E0A0A;color:#F87171}.bm{background:#2E1A00;color:#F59E0B}
+.bv{background:#0A2E1E;color:#4ade80}.bw{background:#1A2D50;color:#6BA3E8}
+.bt{background:var(--sur2);color:var(--txt2)}
+.stc{background:#0A2E1E;color:#4ade80}.stnc{background:#2E0A0A;color:#F87171}
+.stip{background:#2E1A00;color:#F59E0B}
+.del-btn{background:none;border:1px solid var(--bdr);border-radius:6px;padding:2px 8px;font-size:10px;color:var(--txt2);cursor:pointer}
+.del-btn:hover{background:var(--red);border-color:var(--red);color:#fff}
+.section-title{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px}
+.refresh-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer}
+.empty{padding:20px;text-align:center;color:var(--txt3);font-size:12px}
+.stat-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr)}
+.stat-bar:last-child{border-bottom:none}
+.sb-label{font-size:12px;flex:1;color:var(--txt)}
+.sb-track{width:80px;height:5px;background:var(--sur2);border-radius:3px;overflow:hidden}
+.sb-fill{height:5px;border-radius:3px}
+.sb-val{font-size:11px;font-weight:700;min-width:36px;text-align:right}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">VT</div>
+    <div><div class="tb-name">SPOI VT — Admin</div><div class="tb-sub">Tableau de bord administrateur · Supabase</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="live"><div class="dot"></div>Live Supabase</div>
+    <a class="back-btn" href="portail.html">← Portail</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="page-title">Administration SPOI VT</div>
+  <div class="page-sub">Vue complète des données · Dernière mise à jour : <span id="last-upd">—</span></div>
+
+  <div class="krow">
+    <div class="ki cg"><div class="kv" id="k-conf" style="color:#0D9E5C">-</div><div class="kl">Taux conformité</div><div class="kd" id="k-conf-d" style="color:#0D9E5C"></div></div>
+    <div class="ki cb"><div class="kv" id="k-vt" style="color:#1A6FE8">-</div><div class="kl">Fiches VT total</div><div class="kd" id="k-vt-d" style="color:#8BA4C0"></div></div>
+    <div class="ki cr"><div class="kv" id="k-ncr" style="color:#D93025">-</div><div class="kl">NCR ouvertes</div><div class="kd" id="k-ncr-d" style="color:#D93025"></div></div>
+    <div class="ki ca"><div class="kv" id="k-risk" style="color:#C97A00">-</div><div class="kl">Jalons à risque</div><div class="kd" style="color:#C97A00">Action requise</div></div>
+    <div class="ki cb"><div class="kv" id="k-ag" style="color:#1A6FE8">-</div><div class="kl">Agents actifs</div><div class="kd" id="k-ag-d" style="color:#8BA4C0"></div></div>
+    <div class="ki cg"><div class="kv" id="k-db" style="color:#0D9E5C">✓</div><div class="kl">Base de données</div><div class="kd" style="color:#0D9E5C">Supabase OK</div></div>
+  </div>
+
+  <div class="grid2">
+    <!-- FICHES VT -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Fiches VT récentes</span>
+        <span class="ct-sub" id="vt-count">—</span>
+      </div>
+      <table>
+        <thead><tr><th>N° Fiche</th><th>Équipement</th><th>Gare</th><th>Vérificateur</th><th>Statut</th><th>Date</th></tr></thead>
+        <tbody id="vt-tbody"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- NCR -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">NCR / Réserves</span>
+        <span class="ct-sub" id="ncr-count">—</span>
+      </div>
+      <table>
+        <thead><tr><th>N° NCR</th><th>Équipement</th><th>Gare</th><th>Criticité</th><th>Statut</th><th>Jours</th></tr></thead>
+        <tbody id="ncr-tbody"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <!-- PLANNING -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Planning phases</span>
+        <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+      </div>
+      <div id="planning-list"></div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Charge équipe S#11</span>
+      </div>
+      <div id="agent-list"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hdr">
+      <span class="card-title">Absences planifiées</span>
+      <span class="ct-sub" id="abs-count">—</span>
+    </div>
+    <table>
+      <thead><tr><th>Agent</th><th>Type</th><th>Date début</th><th>Date fin</th><th>Jours</th><th>Motif</th><th>Approuvé</th></tr></thead>
+      <tbody id="abs-tbody"><tr><td colspan="7" class="empty">Chargement...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+var SB_URL='https://kkixktqinfxlkaolslvv.supabase.co';
+var SB_KEY='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+
+function load(){
+  Promise.all([
+    fetch(SB_URL+'/rest/v1/fiches_vt?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/ncr_reserves?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/planning_phases?order=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/agents?actif=eq.true',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/absences?order=date_debut',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/affectations?semaine=eq.S%2311',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}),
+    fetch(SB_URL+'/rest/v1/jalons?statut=eq.Risque',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    var fiches=res[0]||[], ncrs=res[1]||[], phases=res[2]||[];
+    var agents=res[3]||[], absences=res[4]||[], affectations=res[5]||[], jalons=res[6]||[];
+    
+    // KPIs
+    var total=fiches.length;
+    var conf=fiches.filter(function(f){return f.statut==='Conforme';}).length;
+    var pct=total?Math.round(conf/total*100):0;
+    var ncrOuv=ncrs.filter(function(n){return n.statut!=='Levée';}).length;
+    
+    document.getElementById('k-conf').textContent=pct+'%';
+    document.getElementById('k-conf-d').textContent=conf+' C / '+total+' total';
+    document.getElementById('k-vt').textContent=total;
+    document.getElementById('k-vt-d').textContent=fiches.filter(function(f){return f.statut==='Non-Conforme';}).length+' NC';
+    document.getElementById('k-ncr').textContent=ncrOuv;
+    document.getElementById('k-ncr-d').textContent=ncrs.filter(function(n){return n.criticite==='Critique'&&n.statut!=='Levée';}).length+' critiques';
+    document.getElementById('k-risk').textContent=jalons.length;
+    document.getElementById('k-ag').textContent=agents.length;
+    document.getElementById('k-ag-d').textContent=absences.length+' absence(s)';
+    document.getElementById('last-upd').textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+    // Fiches VT table
+    document.getElementById('vt-count').textContent=total+' fiches';
+    document.getElementById('vt-tbody').innerHTML=fiches.map(function(f){
+      var sc=f.statut==='Conforme'?'stc':f.statut==='Non-Conforme'?'stnc':'stip';
+      return '<tr><td style="font-family:monospace;font-weight:600">'+(f.titre||'VT-'+f.id)+'</td>'+
+        '<td>'+(f.equipement||'—')+'</td><td>'+(f.gare||'—')+'</td>'+
+        '<td>'+(f.verificateur||'—')+'</td>'+
+        '<td><span class="badge '+sc+'">'+(f.statut||'—')+'</span></td>'+
+        '<td>'+(f.date_fiche||'—')+'</td></tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">Aucune fiche</td></tr>';
+
+    // NCR table
+    var today=new Date();
+    document.getElementById('ncr-count').textContent=ncrOuv+' ouvertes';
+    document.getElementById('ncr-tbody').innerHTML=ncrs.map(function(n){
+      var critCls=n.criticite==='Critique'?'bc':'bm';
+      var stCls=n.statut==='Levée'?'bv':n.statut==='En traitement'?'bw':'bc';
+      var jours=Math.floor((today-new Date(n.created_at))/(1000*60*60*24));
+      var joursColor=jours>5?'#F87171':jours>=4?'#F59E0B':'#4ade80';
+      return '<tr><td style="font-family:monospace;font-weight:600">'+(n.titre||'NCR-'+n.id)+'</td>'+
+        '<td>'+(n.equipement||'—')+'</td><td>'+(n.gare||'—')+'</td>'+
+        '<td><span class="badge '+critCls+'">'+(n.criticite||'—')+'</span></td>'+
+        '<td><span class="badge '+stCls+'">'+(n.statut||'—')+'</span></td>'+
+        '<td style="font-weight:700;color:'+joursColor+'">'+jours+'j</td></tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">Aucune NCR</td></tr>';
+
+    // Planning
+    document.getElementById('planning-list').innerHTML=phases.map(function(p){
+      var pct=p.pct_avancement||0;
+      var color=p.statut==='Terminé'?'#0D9E5C':p.statut==='Risque'?'#D93025':pct>=50?'#1A6FE8':'#C97A00';
+      return '<div class="stat-bar">'+
+        '<span class="sb-label">'+(p.libelle||p.id_phase||'—')+'</span>'+
+        '<div class="sb-track"><div class="sb-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+        '<span class="sb-val" style="color:'+color+'">'+pct+'%</span>'+
+      '</div>';
+    }).join('')||'<div class="empty">Aucune phase</div>';
+
+    // Agents
+    document.getElementById('agent-list').innerHTML=agents.map(function(a){
+      var aff=affectations.find(function(x){return x.id_agent===a.id_agent;});
+      var vt=aff?aff.nb_vt:0;
+      var max=a.max_vt_semaine||10;
+      var pct=Math.min(vt/max*100,100);
+      var color=vt>max?'#F87171':vt>=max*0.9?'#F59E0B':'#4ade80';
+      return '<div class="stat-bar">'+
+        '<span class="sb-label">'+(a.nom||'—')+' <span style="font-size:10px;color:var(--txt3)">('+a.role+')</span></span>'+
+        '<div class="sb-track"><div class="sb-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+        '<span class="sb-val" style="color:'+color+'">'+vt+'/'+max+'</span>'+
+      '</div>';
+    }).join('')||'<div class="empty">Aucun agent</div>';
+
+    // Absences
+    document.getElementById('abs-count').textContent=absences.length+' absence(s)';
+    document.getElementById('abs-tbody').innerHTML=absences.map(function(a){
+      return '<tr><td>'+(a.nom_agent||'—')+'</td>'+
+        '<td>'+(a.type_absence||'—')+'</td>'+
+        '<td>'+(a.date_debut||'—')+'</td>'+
+        '<td>'+(a.date_fin||'—')+'</td>'+
+        '<td>'+(a.nb_jours||'?')+'j</td>'+
+        '<td>'+(a.motif||'—')+'</td>'+
+        '<td>'+(a.approuve?'✅':'⏳')+'</td></tr>';
+    }).join('')||'<tr><td colspan="7" class="empty">Aucune absence</td></tr>';
+  }).catch(function(e){
+    console.error('Erreur:', e);
+    document.getElementById('last-upd').textContent='Erreur de connexion';
+  });
+}
+
+load();
+setInterval(load, 15000);
+</script>
+</body></html>
