@@ -570,13 +570,7 @@ function rHome(){
 function editFiche(idx){
   var f=S.fiches[idx];
   if(!f||!f.supabase_id)return;
-  var newStatut=prompt('Modifier le statut:
-1. Conforme
-2. Non-Conforme
-3. En cours
-
-Statut actuel: '+f.statut+'
-Entrez le nouveau statut:',f.statut);
+  var newStatut=prompt('Statut (Conforme/Non-Conforme/En cours): '+f.statut,f.statut);
   if(!newStatut)return;
   var newObs=prompt('Observations (actuel: '+f.obs+'):', f.obs||'');
   
@@ -597,9 +591,7 @@ Entrez le nouveau statut:',f.statut);
 function deleteFiche(idx){
   var f=S.fiches[idx];
   if(!f||!f.supabase_id)return;
-  if(!confirm('Supprimer la fiche '+f.id+' ?
-
-Cette action est irréversible.'))return;
+  if(!confirm('Supprimer la fiche '+f.id+' ? Cette action est irreversible.'))return;
   
   fetch(SUPABASE_URL+'/rest/v1/fiches_vt?id=eq.'+f.supabase_id,{
     method:'DELETE',
