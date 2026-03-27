@@ -3,259 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SPOI VT — Module 03 · NCR</title>
+<title>SPOI VT - Module 03 NCR</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.topbar{background:#D93025;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#D93025;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
 .tb-l{display:flex;align-items:center;gap:12px}
 .back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
-.tb-title{font-size:14px;font-weight:700;color:#fff}
-.tb-sub{font-size:10px;color:rgba(255,255,255,.7)}
-.sync-badge{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.7)}
+.sbadge{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700}
 .content{padding:14px;max-width:800px;margin:0 auto}
 .krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
 .ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
 .kv{font-size:22px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
 .kr{color:#D93025}.ka{color:#C97A00}.kg{color:#0D9E5C}.kb{color:#1A6FE8}
-.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.filter-btn{background:#fff;border:1.5px solid #C8D5E3;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;color:#4A5E74}
-.filter-btn.act{background:#D93025;border-color:#D93025;color:#fff}
+.fbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.fb{background:#fff;border:1.5px solid #C8D5E3;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;color:#4A5E74}
+.fb.act{background:#D93025;border-color:#D93025;color:#fff}
 .card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:10px;overflow:hidden}
-.ncr-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid #EEF2F7}
-.ncr-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ncr-id{font-size:11px;font-family:monospace;font-weight:700;background:#EEF2F7;padding:2px 8px;border-radius:4px}
+.nhdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid #EEF2F7}
+.ntop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nid{font-size:11px;font-family:monospace;font-weight:700;background:#EEF2F7;padding:2px 8px;border-radius:4px}
 .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .bc{background:#FEE8E6;color:#B02018}.bm{background:#FFF4E0;color:#9E5F00}
-.bo{background:#FEE8E6;color:#B02018}.bt{background:#FFF4E0;color:#9E5F00}
-.bv{background:#E6F9F1;color:#0A7A47}.btr{background:#EBF2FF;color:#1558C0}
-.ncr-body{padding:12px 14px;display:none}
-.ncr-body.open{display:block}
-.ncr-desc{font-size:13px;font-weight:600;margin-bottom:6px}
-.ncr-meta{font-size:11px;color:#7A90A4;margin-bottom:10px}
-.delai-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.dl-label{font-size:10px;color:#7A90A4;font-weight:600;white-space:nowrap}
-.dl-track{flex:1;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden}
-.dl-fill{height:6px;border-radius:3px}
-.dl-val{font-size:10px;font-weight:700;white-space:nowrap}
-.workflow{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.wf-btn{flex:1;padding:8px;border-radius:8px;border:2px solid #C8D5E3;background:#F8FAFC;font-size:11px;font-weight:700;cursor:pointer;text-align:center;min-width:80px;transition:all .15s}
-.wf-btn.wf-act{border-color:currentColor}
-.wf-ouv{color:#D93025}.wf-ouv.wf-act{background:#FEE8E6;border-color:#D93025}
-.wf-trait{color:#1A6FE8}.wf-trait.wf-act{background:#EBF2FF;border-color:#1A6FE8}
-.wf-lev{color:#0D9E5C}.wf-lev.wf-act{background:#E6F9F1;border-color:#0D9E5C}
-.form-section{background:#F8FAFC;border-radius:8px;padding:12px;margin-bottom:10px}
-.form-lbl{font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:6px;display:block}
-.form-in{width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff;margin-bottom:8px}
-.form-in:focus{border-color:#1A6FE8}
-.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn-save{width:100%;background:#0D9E5C;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
-.btn-save:hover{background:#0A7A47}
+.bo{background:#FEE8E6;color:#B02018}.btr{background:#EBF2FF;color:#1558C0}
+.bv{background:#E6F9F1;color:#0A7A47}
+.nbody{padding:12px 14px;display:none}
+.nbody.open{display:block}
+.ndesc{font-size:13px;font-weight:600;margin-bottom:6px}
+.nmeta{font-size:11px;color:#7A90A4;margin-bottom:10px;line-height:1.7}
+.dbar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dlbl{font-size:10px;color:#7A90A4;font-weight:600;white-space:nowrap}
+.dtrk{flex:1;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden}
+.dfil{height:6px;border-radius:3px}
+.dval{font-size:10px;font-weight:700;white-space:nowrap}
+.fsec{background:#F8FAFC;border-radius:8px;padding:12px;margin-bottom:10px;border:1px solid #E2E8F0}
+.flbl{font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:6px;display:block}
+.fin{width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:#fff;margin-bottom:8px}
+.fin:focus{border-color:#1A6FE8}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wf{display:flex;gap:6px;margin-bottom:10px}
+.wb{flex:1;padding:10px 4px;border-radius:8px;border:2px solid #C8D5E3;background:#fff;font-size:10px;font-weight:700;cursor:pointer;text-align:center}
+.wo{color:#D93025}.wo.on{background:#FEE8E6;border-color:#D93025}
+.wt{color:#1A6FE8}.wt.on{background:#EBF2FF;border-color:#1A6FE8}
+.wl{color:#0D9E5C}.wl.on{background:#E6F9F1;border-color:#0D9E5C}
+.bsave{width:100%;background:#0D9E5C;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
 .empty{text-align:center;padding:32px;color:#7A90A4;font-size:13px}
-.loading{text-align:center;padding:20px;color:#1A6FE8;font-size:13px}
-.action-hist{font-size:11px;color:#4A5E74;background:#EEF2F7;border-radius:6px;padding:8px 10px;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="topbar">
   <div class="tb-l">
-    <a class="back-btn" href="portail.html">← Portail</a>
-    <div><div class="tb-title">Module 03 — NCR / Réserves</div><div class="tb-sub">Workflow traitement · Délai contractuel 5j</div></div>
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Module 03 &mdash; NCR / R&eacute;serves</div><div class="tb-s">Workflow traitement &middot; D&eacute;lai contractuel 5j</div></div>
   </div>
-  <span class="sync-badge" id="sync-badge">⏳ Chargement...</span>
+  <span class="sbadge" id="sbadge">&#9203; Chargement...</span>
 </div>
 <div class="content">
   <div class="krow">
-    <div class="ki"><div class="kv kr" id="k-ouv">-</div><div class="kl">Ouvertes</div></div>
-    <div class="ki"><div class="kv kb" id="k-trait">-</div><div class="kl">En traitement</div></div>
-    <div class="ki"><div class="kv kg" id="k-lev">-</div><div class="kl">Levées</div></div>
-    <div class="ki"><div class="kv kr" id="k-dep">-</div><div class="kl">Hors délai</div></div>
+    <div class="ki"><div class="kv kr" id="kouv">-</div><div class="kl">Ouvertes</div></div>
+    <div class="ki"><div class="kv kb" id="ktrait">-</div><div class="kl">En traitement</div></div>
+    <div class="ki"><div class="kv kg" id="klev">-</div><div class="kl">Lev&eacute;es</div></div>
+    <div class="ki"><div class="kv kr" id="kdep">-</div><div class="kl">Hors d&eacute;lai</div></div>
   </div>
-  <div class="filter-bar">
-    <button class="filter-btn act" onclick="setFilter('all',this)">Toutes</button>
-    <button class="filter-btn" onclick="setFilter('Ouverte',this)">Ouvertes</button>
-    <button class="filter-btn" onclick="setFilter('En traitement',this)">En traitement</button>
-    <button class="filter-btn" onclick="setFilter('Levée',this)">Levées</button>
-    <button class="filter-btn" onclick="setFilter('Critique',this)">Critiques</button>
+  <div class="fbar">
+    <button class="fb act" onclick="setF('all',this)">Toutes</button>
+    <button class="fb" onclick="setF('Ouverte',this)">Ouvertes</button>
+    <button class="fb" onclick="setF('En traitement',this)">En traitement</button>
+    <button class="fb" onclick="setF('Levee',this)">Lev&eacute;es</button>
+    <button class="fb" onclick="setF('Critique',this)">Critiques</button>
   </div>
-  <div id="ncr-list"><div class="loading">⏳ Chargement depuis Supabase...</div></div>
+  <div id="nlist"><div class="empty">&#9203; Chargement depuis Supabase...</div></div>
 </div>
-
 <script>
-var SB_URL='https://kkixktqinfxlkaolslvv.supabase.co';
-var SB_KEY='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
-var allNCR=[];
-var currentFilter='all';
-var openCard=null;
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var ALL=[];
+var CF='all';
+var OC=null;
 
-function setFilter(f,btn){
-  currentFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('act');});
+function setF(f,btn){
+  CF=f;
+  document.querySelectorAll('.fb').forEach(function(b){b.classList.remove('act');});
   btn.classList.add('act');
-  renderNCR();
+  render();
 }
 
-function loadNCR(){
-  fetch(SB_URL+'/rest/v1/ncr_reserves?order=created_at.desc',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+function load(){
+  fetch(SU+'/rest/v1/ncr_reserves?order=created_at.desc',{
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK}
   })
   .then(function(r){return r.json();})
-  .then(function(data){
-    allNCR=data||[];
-    document.getElementById('sync-badge').textContent='✓ '+allNCR.length+' NCR';
-    document.getElementById('sync-badge').style.background='rgba(13,158,92,.3)';
-    updateKPIs();
-    renderNCR();
+  .then(function(d){
+    ALL=d||[];
+    document.getElementById('sbadge').textContent='OK '+ALL.length+' NCR';
+    document.getElementById('sbadge').style.background='rgba(13,158,92,.3)';
+    kpis();render();
   })
-  .catch(function(e){
-    document.getElementById('sync-badge').textContent='⚠ Erreur';
-    document.getElementById('ncr-list').innerHTML='<div class="empty">Impossible de charger les données.</div>';
+  .catch(function(){
+    document.getElementById('sbadge').textContent='Erreur reseau';
+    document.getElementById('nlist').innerHTML='<div class="empty">Erreur connexion Supabase</div>';
   });
 }
 
-function updateKPIs(){
-  var today=new Date();
-  var ouv=allNCR.filter(function(n){return n.statut==='Ouverte';}).length;
-  var trait=allNCR.filter(function(n){return n.statut==='En traitement';}).length;
-  var lev=allNCR.filter(function(n){return n.statut==='Levée';}).length;
-  var dep=allNCR.filter(function(n){
-    if(n.statut==='Levée')return false;
-    return(today-new Date(n.created_at))/(1000*60*60*24)>5;
-  }).length;
-  document.getElementById('k-ouv').textContent=ouv;
-  document.getElementById('k-trait').textContent=trait;
-  document.getElementById('k-lev').textContent=lev;
-  document.getElementById('k-dep').textContent=dep;
+function kpis(){
+  var t=new Date();
+  var ouv=0,tr=0,lv=0,dep=0;
+  ALL.forEach(function(n){
+    if(n.statut==='Ouverte')ouv++;
+    else if(n.statut==='En traitement')tr++;
+    else if(n.statut==='Levee'||n.statut==='Levée')lv++;
+    if(n.statut!=='Levee'&&n.statut!=='Levée'){
+      if((t-new Date(n.created_at))/(86400000)>5)dep++;
+    }
+  });
+  document.getElementById('kouv').textContent=ouv;
+  document.getElementById('ktrait').textContent=tr;
+  document.getElementById('klev').textContent=lv;
+  document.getElementById('kdep').textContent=dep;
 }
 
-function renderNCR(){
-  var data=allNCR;
-  if(currentFilter!=='all'){
-    if(currentFilter==='Critique'){
+function render(){
+  var data=ALL.slice();
+  if(CF!=='all'){
+    if(CF==='Critique'){
       data=data.filter(function(n){return n.criticite==='Critique';});
-    } else {
-      data=data.filter(function(n){return n.statut===currentFilter;});
+    }else if(CF==='Levee'){
+      data=data.filter(function(n){return n.statut==='Levee'||n.statut==='Levée';});
+    }else{
+      data=data.filter(function(n){return n.statut===CF;});
     }
   }
   if(!data.length){
-    document.getElementById('ncr-list').innerHTML='<div class="empty">✅ Aucune NCR pour ce filtre</div>';
+    document.getElementById('nlist').innerHTML='<div class="empty">Aucune NCR</div>';
     return;
   }
-  var today=new Date();
-  var html=data.map(function(n){
-    var critCls=n.criticite==='Critique'?'bc':'bm';
-    var stCls=n.statut==='Levée'?'bv':n.statut==='En traitement'?'btr':'bo';
-    var jours=Math.floor((today-new Date(n.created_at))/(1000*60*60*24));
-    var delaiPct=Math.min(jours/5*100,100);
-    var delaiColor=n.statut==='Levée'?'#0D9E5C':jours>5?'#D93025':jours>=4?'#C97A00':'#0D9E5C';
-    var delaiTxt=n.statut==='Levée'?'Levée ✓':jours>5?(jours-5)+'j DÉPASSÉ ⚠':((5-jours)+'j restant');
-    var isOpen=openCard===n.id;
-    
-    return '<div class="card" id="card-'+n.id+'">'+
-      '<div class="ncr-hdr" onclick="toggleCard('+n.id+')">'+
-        '<div class="ncr-top">'+
-          '<span class="ncr-id">'+(n.titre||'NCR-'+n.id)+'</span>'+
-          '<span class="badge '+critCls+'">'+(n.criticite||'Mineure')+'</span>'+
-          '<span class="badge '+stCls+'">'+(n.statut||'Ouverte')+'</span>'+
-          '<span style="font-size:11px;color:'+delaiColor+';font-weight:700">'+delaiTxt+'</span>'+
-        '</div>'+
-        '<span style="font-size:16px;color:#7A90A4">'+(isOpen?'▲':'▼')+'</span>'+
-      '</div>'+
-      '<div class="ncr-body'+(isOpen?' open':'')+'" id="body-'+n.id+'">'+
-        '<div class="ncr-desc">'+(n.description||'Non-conformité détectée')+'</div>'+
-        '<div class="ncr-meta">'+
-          '<b>Équipement:</b> '+(n.equipement||'—')+' · '+
-          '<b>ID:</b> '+(n.id_terrain||'—')+' · '+
-          '<b>Gare:</b> '+(n.gare||'—')+' · '+
-          '<b>Voie:</b> '+(n.voie||'—')+'<br>'+
-          '<b>Ouvert par:</b> '+(n.ouvert_par||'—')+' le '+(n.date_ouverture||'—')+
-          (n.leve_par?'<br><b>Levé par:</b> '+n.leve_par+' le '+(n.date_cloture||'—'):'')+
-        '</div>'+
-        '<div class="delai-bar">'+
-          '<span class="dl-label">Délai 5j</span>'+
-          '<div class="dl-track"><div class="dl-fill" style="width:'+delaiPct+'%;background:'+delaiColor+'"></div></div>'+
-          '<span class="dl-val" style="color:'+delaiColor+'">'+jours+'j écoulé(s)</span>'+
-        '</div>'+
-        
-        // WORKFLOW
-        '<div class="form-section">'+
-          '<span class="form-lbl">🔄 Changer le statut</span>'+
-          '<div class="workflow">'+
-            '<button class="wf-btn wf-ouv'+(n.statut==='Ouverte'?' wf-act':'')+'" onclick="changeStatut('+n.id+','Ouverte')">⚠ Ouverte</button>'+
-            '<button class="wf-btn wf-trait'+(n.statut==='En traitement'?' wf-act':'')+'" onclick="changeStatut('+n.id+','En traitement')">🔧 En traitement</button>'+
-            '<button class="wf-btn wf-lev'+(n.statut==='Levée'?' wf-act':'')+'" onclick="changeStatut('+n.id+','Levée')">✅ Levée</button>'+
-          '</div>'+
-        '</div>'+
-        
-        // FORMULAIRE TRAITEMENT
-        '<div class="form-section">'+
-          '<span class="form-lbl">📝 Traitement & clôture</span>'+
-          '<div class="form-row2">'+
-            '<div><label class="form-lbl">Responsable levée</label><input class="form-in" id="resp-'+n.id+'" placeholder="Nom agent" value="'+(n.leve_par||'')+'"></div>'+
-            '<div><label class="form-lbl">Date clôture</label><input class="form-in" type="date" id="date-'+n.id+'" value="'+(n.date_cloture||'')+'"></div>'+
-          '</div>'+
-          '<label class="form-lbl">Action corrective</label>'+
-          '<textarea class="form-in" id="action-'+n.id+'" rows="2" placeholder="Décrivez l'action corrective effectuée...">'+(n.action_corrective||'')+'</textarea>'+
-          '<label class="form-lbl">Criticité</label>'+
-          '<select class="form-in" id="crit-'+n.id+'">'+
-            '<option value="Mineure"'+(n.criticite==='Mineure'?' selected':'')+'>Mineure</option>'+
-            '<option value="Critique"'+(n.criticite==='Critique'?' selected':'')+'>Critique</option>'+
-          '</select>'+
-          '<button class="btn-save" onclick="saveNCR('+n.id+')">💾 Enregistrer le traitement</button>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  document.getElementById('ncr-list').innerHTML=html;
+  var t=new Date();
+  var h='';
+  for(var i=0;i<data.length;i++){
+    var n=data[i];
+    var isLev=(n.statut==='Levee'||n.statut==='Levée');
+    var isTr=(n.statut==='En traitement');
+    var isOuv=(n.statut==='Ouverte');
+    var cc=n.criticite==='Critique'?'bc':'bm';
+    var sc=isLev?'bv':isTr?'btr':'bo';
+    var j=Math.floor((t-new Date(n.created_at))/86400000);
+    var dp=Math.min(j/5*100,100);
+    var dc=isLev?'#0D9E5C':j>5?'#D93025':j>=4?'#C97A00':'#0D9E5C';
+    var dt=isLev?'Levee':''+j+'j';
+    var op=(OC===n.id);
+    h+='<div class="card">';
+    h+='<div class="nhdr" onclick="tog('+n.id+')">';
+    h+='<div class="ntop">';
+    h+='<span class="nid">'+(n.titre||('NCR-'+n.id))+'</span>';
+    h+='<span class="badge '+cc+'">'+(n.criticite||'Mineure')+'</span>';
+    h+='<span class="badge '+sc+'">'+(n.statut||'Ouverte')+'</span>';
+    h+='<span style="font-size:11px;color:'+dc+';font-weight:700">'+dt+'</span>';
+    h+='</div>';
+    h+='<span style="font-size:14px;color:#7A90A4">'+(op?'&#9650;':'&#9660;')+'</span>';
+    h+='</div>';
+    h+='<div class="nbody'+(op?' open':'')+'">';
+    h+='<div class="ndesc">'+(n.description||'Non-conformite')+'</div>';
+    h+='<div class="nmeta">';
+    h+='Equip: '+(n.equipement||'-')+' | Gare: '+(n.gare||'-')+' | Voie: '+(n.voie||'-')+'<br>';
+    h+='Ouvert par: '+(n.ouvert_par||'-')+' le '+(n.date_ouverture||'-');
+    if(n.leve_par)h+='<br>Leve par: '+n.leve_par+' le '+(n.date_cloture||'-');
+    h+='</div>';
+    h+='<div class="dbar"><span class="dlbl">Delai 5j</span>';
+    h+='<div class="dtrk"><div class="dfil" style="width:'+dp+'%;background:'+dc+'"></div></div>';
+    h+='<span class="dval" style="color:'+dc+'">'+j+'j</span></div>';
+    h+='<div class="fsec"><span class="flbl">Changer statut</span>';
+    h+='<div class="wf">';
+    h+='<button class="wb wo'+(isOuv?' on':'')+'" onclick="chSt('+n.id+',1)">Ouverte</button>';
+    h+='<button class="wb wt'+(isTr?' on':'')+'" onclick="chSt('+n.id+',2)">En traitement</button>';
+    h+='<button class="wb wl'+(isLev?' on':'')+'" onclick="chSt('+n.id+',3)">Levee</button>';
+    h+='</div></div>';
+    h+='<div class="fsec"><span class="flbl">Traitement</span>';
+    h+='<div class="fr2">';
+    h+='<div><label class="flbl">Responsable</label>';
+    h+='<input class="fin" id="r'+n.id+'" value="'+(n.leve_par||'')+'" placeholder="Nom agent"></div>';
+    h+='<div><label class="flbl">Date cloture</label>';
+    h+='<input class="fin" type="date" id="d'+n.id+'" value="'+(n.date_cloture||'')+'"></div>';
+    h+='</div>';
+    h+='<label class="flbl">Action corrective</label>';
+    h+='<textarea class="fin" id="a'+n.id+'" rows="2">'+(n.action_corrective||'')+'</textarea>';
+    h+='<button class="bsave" onclick="sNCR('+n.id+')">Enregistrer</button>';
+    h+='</div></div></div>';
+  }
+  document.getElementById('nlist').innerHTML=h;
 }
 
-function toggleCard(id){
-  openCard=openCard===id?null:id;
-  renderNCR();
-}
+function tog(id){OC=(OC===id)?null:id;render();}
 
-function changeStatut(id, statut){
-  fetch(SB_URL+'/rest/v1/ncr_reserves?id=eq.'+id,{
+var ST=['','Ouverte','En traitement','Levée'];
+
+function chSt(id,c){
+  var s=ST[c];
+  fetch(SU+'/rest/v1/ncr_reserves?id=eq.'+id,{
     method:'PATCH',
-    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-    body:JSON.stringify({statut:statut})
+    headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+    body:JSON.stringify({statut:s})
   }).then(function(){
-    var ncr=allNCR.find(function(n){return n.id===id;});
-    if(ncr)ncr.statut=statut;
-    updateKPIs();
-    renderNCR();
+    for(var i=0;i<ALL.length;i++){if(ALL[i].id===id){ALL[i].statut=s;break;}}
+    kpis();render();
   });
 }
 
-function saveNCR(id){
-  var resp=document.getElementById('resp-'+id).value;
-  var date=document.getElementById('date-'+id).value;
-  var action=document.getElementById('action-'+id).value;
-  var crit=document.getElementById('crit-'+id).value;
-  
-  var data={
-    leve_par:resp,
-    date_cloture:date,
-    action_corrective:action,
-    criticite:crit
-  };
-  
-  // Si responsable et date renseignés → statut Levée automatique
-  if(resp&&date){data.statut='Levée';}
-  
-  fetch(SB_URL+'/rest/v1/ncr_reserves?id=eq.'+id,{
+function sNCR(id){
+  var r=document.getElementById('r'+id).value;
+  var d=document.getElementById('d'+id).value;
+  var a=document.getElementById('a'+id).value;
+  var data={leve_par:r,date_cloture:d,action_corrective:a};
+  if(r&&d)data.statut='Levée';
+  fetch(SU+'/rest/v1/ncr_reserves?id=eq.'+id,{
     method:'PATCH',
-    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
     body:JSON.stringify(data)
-  }).then(function(r){
-    if(r.ok){
-      loadNCR();
-      alert('✓ NCR mise à jour dans Supabase'+(resp&&date?' — Statut: Levée':''));
-    }
+  }).then(function(res){
+    if(res.ok){load();alert('NCR mise a jour'+(r&&d?' - Statut: Levee':''));}
   });
 }
 
-loadNCR();
-setInterval(loadNCR,30000);
+load();
+setInterval(load,30000);
 </script>
 </body></html>
