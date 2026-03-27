@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A6FE8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SPOI VT">
+<meta name="description" content="Module 01 Collecte terrain VT — ONCF CSP Phase 1">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>SPOI VT — Module 01</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F0F4F8;--sur:#FFFFFF;--sur2:#EEF2F7;--sur3:#E2E8F0;--bdr:#C8D5E3;--bdr2:#A0B4C8;
+  --blue:#1A6FE8;--blue-l:#EBF2FF;--blue-b:#1558C0;
+  --green:#0D9E5C;--green-l:#E6F9F1;--green-b:#0A7A47;
+  --red:#D93025;--red-l:#FEE8E6;--red-b:#B02018;
+  --amb:#C97A00;--amb-l:#FFF4E0;--amb-b:#9E5F00;
+  --txt:#1A2535;--txt2:#4A5E74;--txt3:#7A90A4;
+  --r:12px;--rs:8px
+}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;min-height:-webkit-fill-available}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+/* --- TOPBAR --- */
+.sbar{background:var(--blue);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding-top:env(safe-area-inset-top,9px)}
+.sb-proj{font-size:11px;color:rgba(255,255,255,.85);font-weight:600}
+.sb-r{display:flex;align-items:center;gap:6px}
+.net-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.4)}
+.net-on{background:rgba(13,158,92,.35);color:#fff}
+.net-off{background:rgba(201,122,0,.35);color:#fff}
+.pend-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.2);color:#fff;display:none}
+/* --- OFFLINE BANNER --- */
+.offline-bar{background:var(--amb-l);border-bottom:2px solid var(--amb);padding:8px 16px;font-size:11px;font-weight:600;color:var(--amb-b);display:none;align-items:center;gap:8px}
+.offline-bar.show{display:flex}
+/* --- SCROLL --- */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen{display:none}
+.screen.active{display:block}
+/* --- HOME --- */
+.hdr{padding:18px 16px 14px;background:var(--blue);color:#fff}
+.hdr-g{font-size:12px;opacity:.8;margin-bottom:3px}
+.hdr-n{font-size:20px;font-weight:700}
+.hdr-d{font-size:11px;opacity:.7;margin-top:2px}
+.krow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--bdr)}
+.ki{background:var(--sur);padding:14px 10px;text-align:center}
+.kv{font-size:24px;font-weight:700}.kl{font-size:10px;color:var(--txt2);margin-top:3px}
+.kg{color:var(--green)}.kr{color:var(--red)}.ka{color:var(--amb)}
+.sp{padding:16px}
+.btn-main{width:100%;background:var(--blue);color:#fff;border:none;border-radius:16px;padding:18px 20px;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(26,111,232,.3)}
+.btn-main:active{opacity:.9}
+.bmi{width:36px;height:36px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.bmt{text-align:left}
+.bms{font-size:12px;font-weight:400;opacity:.85;margin-top:2px}
+.stl{font-size:11px;font-weight:700;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.fc{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:8px}
+.fc-t{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.fc-id{font-size:11px;font-family:monospace;color:var(--txt2);background:var(--sur2);padding:2px 8px;border-radius:4px;font-weight:600}
+.fc-st{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.stc{background:var(--green-l);color:var(--green-b)}.stnc{background:var(--red-l);color:var(--red-b)}.stip{background:var(--amb-l);color:var(--amb-b)}
+.fc-eq{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px}
+.fc-m{font-size:12px;color:var(--txt2)}
+.fc-loc{font-size:11px;color:var(--blue);font-weight:600;margin-top:2px}
+.fc-sync{font-size:10px;margin-top:5px;font-weight:600}
+.sync-ok{color:var(--green-b)}.sync-pend{color:var(--amb-b)}
+.pbar-bg{height:4px;background:var(--sur2);border-radius:2px;margin-top:10px}
+.pbar-f{height:4px;border-radius:2px;background:var(--blue)}
+/* --- INSTALL PROMPT --- */
+.install-card{background:var(--blue-l);border:2px solid var(--blue);border-radius:var(--r);padding:14px;margin:0 0 12px;display:flex;align-items:center;gap:12px}
+.ic-icon{font-size:28px;flex-shrink:0}
+.ic-body{flex:1}
+.ic-title{font-size:13px;font-weight:700;color:var(--blue-b);margin-bottom:4px}
+.ic-sub{font-size:11px;color:var(--txt2);line-height:1.5}
+.ic-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:8px}
+/* --- SCREEN SHELL --- */
+.shdr{background:var(--sur);padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.back{width:38px;height:38px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.stitle{font-size:15px;font-weight:700;flex:1}.sind{font-size:12px;color:var(--txt3);font-weight:600}
+.stepbar{display:flex;gap:4px;padding:10px 16px;background:var(--sur);border-bottom:1px solid var(--bdr)}
+.sd{flex:1;height:4px;border-radius:2px;background:var(--sur3)}
+.sd.done{background:var(--green)}.sd.act{background:var(--blue)}
+.scnt{padding:18px 16px;display:none}
+.scnt.active{display:block}
+.flbl{font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
+.flbl span{color:var(--red)}
+.bot{padding:12px 16px;background:var(--sur);border-top:1px solid var(--bdr);position:sticky;bottom:0;bottom:env(safe-area-inset-bottom,0);box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.btn-n{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:16px;font-size:16px;font-weight:700;cursor:pointer}
+.btn-n:disabled{background:var(--sur3);color:var(--txt3);cursor:not-allowed}
+.btn-sv{background:var(--green)}
+/* STEP 1 */
+.sinput{width:100%;background:var(--sur);border:1.5px solid var(--bdr2);border-radius:var(--rs);padding:11px 14px;color:var(--txt);font-size:14px;font-family:inherit;margin-bottom:14px;outline:none}
+.sinput:focus{border-color:var(--blue)}
+.eqgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.eqbtn{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--r);padding:16px 10px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.eqbtn .eqi{font-size:24px}.eqbtn .eqn{font-size:12px;font-weight:600;color:var(--txt);line-height:1.3}
+.eqbtn.sel{background:var(--blue);border-color:var(--blue-b)}
+.eqbtn.sel .eqn{color:#fff}
+/* STEP 2 */
+.loc-wrap{display:flex;flex-direction:column;gap:16px}
+.sel-field{width:100%;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:16px 44px 16px 16px;color:var(--txt);font-size:16px;font-weight:600;font-family:inherit;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;min-height:56px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%234A5E74' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+.sel-field:focus{border-color:var(--blue)}
+.sel-field.has-value{border-color:var(--blue);color:var(--blue);background-color:var(--blue-l)}
+.sel-field:disabled{background:var(--sur2);color:var(--txt3);cursor:not-allowed;border-color:var(--bdr)}
+.pk-row{display:flex;gap:8px;align-items:center}
+.pk-pre{font-size:14px;color:var(--txt2);font-weight:700;background:var(--sur2);border:2px solid var(--bdr);border-radius:var(--rs);padding:15px 14px;flex-shrink:0}
+.pk-in{flex:1;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:15px;color:var(--txt);font-size:18px;font-family:monospace;font-weight:700;text-align:center;outline:none}
+.idinput{width:100%;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:15px;color:var(--txt);font-size:18px;font-family:monospace;font-weight:700;text-align:center;letter-spacing:.04em;outline:none}
+.voie-free{width:100%;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:15px;color:var(--txt);font-size:20px;font-family:monospace;font-weight:700;text-align:center;letter-spacing:.08em;outline:none;text-transform:uppercase}
+.voie-hint{font-size:11px;color:var(--txt3);margin-top:5px}
+.vinput{width:100%;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:15px;color:var(--txt);font-size:15px;font-family:inherit;outline:none}
+.loc-sum{background:var(--blue-l);border:2px solid var(--blue);border-radius:var(--r);padding:13px 16px;font-size:13px;color:var(--txt2);line-height:2;display:none}
+.loc-sum strong{color:var(--blue);font-weight:700}
+/* STEP 3 */
+.photo-section{margin-bottom:20px}
+.pt-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.badge-i{background:var(--blue-l);color:var(--blue-b);font-size:10px;padding:3px 9px;border-radius:10px;font-weight:700;border:1px solid var(--blue)}
+.badge-n{background:var(--red-l);color:var(--red-b);font-size:10px;padding:3px 9px;border-radius:10px;font-weight:700;border:1px solid var(--red)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pthumb{position:relative;aspect-ratio:1;border-radius:var(--rs);overflow:hidden;background:var(--sur2);border:1px solid var(--bdr)}
+.pthumb img{width:100%;height:100%;object-fit:cover}
+.pdel{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.padd{aspect-ratio:1;border-radius:var(--rs);background:var(--sur);border:2px dashed var(--bdr2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--txt2)}
+.padd-i{font-size:22px}.padd-l{font-size:10px;font-weight:700;text-align:center;line-height:1.3}
+.pcnt{font-size:11px;color:var(--txt3);margin-top:6px}
+/* STEP 4 */
+.pts-hdr{background:var(--sur);padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.pts-eq{font-size:13px;font-weight:700}.pts-ct{font-size:12px;color:var(--txt2)}
+.pts-prog{height:4px;background:var(--sur3)}
+.pts-pf{height:4px;background:var(--blue);transition:width .3s}
+.dom-t{font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;padding:14px 16px 6px;background:var(--bg)}
+.ptr{display:flex;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--bdr);gap:10px;background:var(--sur)}
+.ptr.pt-c{background:#F0FBF6}.ptr.pt-nc{background:#FEF2F1}.ptr.pt-na{background:var(--sur2)}
+.pt-num{font-size:11px;font-family:monospace;color:var(--txt3);min-width:22px;flex-shrink:0;padding-top:3px;font-weight:600}
+.pt-body{flex:1;display:flex;flex-direction:column;gap:6px}
+.pt-nm{font-size:13px;line-height:1.4;font-weight:500}
+.pt-val-row{display:flex;align-items:center;gap:6px}
+.pt-val-in{background:var(--sur);border:1.5px solid var(--bdr2);border-radius:var(--rs);padding:7px 10px;color:var(--txt);font-size:14px;font-family:monospace;font-weight:700;width:88px;text-align:center;outline:none}
+.pt-unit{font-size:11px;color:var(--txt2);font-weight:700;background:var(--sur2);padding:4px 8px;border-radius:6px}
+.pt-btns{display:flex;gap:5px;flex-shrink:0;padding-top:2px}
+.ptb{width:40px;height:40px;border-radius:var(--rs);border:2px solid var(--bdr2);background:var(--sur);cursor:pointer;font-size:11px;font-weight:800;color:var(--txt2);display:flex;align-items:center;justify-content:center}
+.ptb.ptc.sel{background:var(--green);border-color:var(--green-b);color:#fff}
+.ptb.ptnc.sel{background:var(--red);border-color:var(--red-b);color:#fff}
+.ptb.ptna.sel{background:var(--sur3);border-color:var(--bdr2);color:var(--txt2)}
+.obs-area{width:100%;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);padding:13px;color:var(--txt);font-size:14px;font-family:inherit;resize:none;min-height:90px;outline:none}
+/* STEP 5 */
+.sig-c{width:100%;height:150px;background:var(--sur);border:2px solid var(--bdr2);border-radius:var(--r);cursor:crosshair;touch-action:none;display:block}
+.sig-c.has-sig{border-color:var(--green)}
+.sig-h{font-size:12px;color:var(--txt3);text-align:center;margin-top:6px}
+.clr-sig{background:none;border:none;color:var(--txt2);font-size:12px;cursor:pointer;margin-top:6px;padding:4px;font-weight:600;text-decoration:underline}
+.recap-c{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-top:16px}
+.rc-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--sur2);font-size:13px}
+.rc-row:last-child{border-bottom:none}
+.rc-k{color:var(--txt2)}.rc-v{font-weight:700}
+/* SUCCESS */
+.suc-wrap{padding:36px 22px;text-align:center}
+.suc-ic{width:76px;height:76px;border-radius:50%;background:var(--green-l);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px;color:var(--green);font-weight:700}
+.suc-t{font-size:22px;font-weight:700;margin-bottom:8px}
+.suc-s{font-size:13px;color:var(--txt2);margin-bottom:22px;line-height:1.6}
+.rb{padding:6px 20px;border-radius:20px;font-size:14px;font-weight:700;display:inline-block;margin-bottom:16px}
+.rbc{background:var(--green-l);color:var(--green-b);border:2px solid var(--green)}
+.rbnc{background:var(--red-l);color:var(--red-b);border:2px solid var(--red)}
+.email-card{background:var(--blue-l);border:2px solid var(--blue);border-radius:var(--r);padding:14px;margin-bottom:16px;text-align:left}
+.email-card-title{font-size:12px;font-weight:700;color:var(--blue-b);margin-bottom:6px}
+.email-card-sub{font-size:11px;color:var(--txt2);line-height:1.5;margin-bottom:10px}
+.btn-email{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-ol{width:100%;background:transparent;color:var(--txt2);border:2px solid var(--bdr);border-radius:var(--r);padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- TOPBAR -->
+<div class="sbar">
+  <div class="sb-proj">ONCF · CSP Phase 1 · Module 01</div>
+  <div class="sb-r">
+    <span class="net-badge net-on" id="net-badge">● En ligne</span>
+    <span class="pend-badge" id="pend-badge"></span>
+  </div>
+</div>
+<!-- OFFLINE BANNER -->
+<div class="offline-bar" id="offline-bar">
+  ⚡ Mode hors-ligne — Les fiches seront synchronisées au retour du réseau
+</div>
+<div class="scroll">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="hdr">
+    <div class="hdr-g">Module 01 — Collecte Terrain</div>
+    <div class="hdr-n">Fiches VT</div>
+    <div class="hdr-d" id="tday"></div>
+  </div>
+  <div class="krow">
+    <div class="ki"><div class="kv kg" id="kc">0</div><div class="kl">Conformes</div></div>
+    <div class="ki"><div class="kv kr" id="knc">0</div><div class="kl">Non-conformes</div></div>
+    <div class="ki"><div class="kv ka" id="kip">0</div><div class="kl">En cours</div></div>
+  </div>
+  <div class="sp" style="padding-bottom:8px">
+    <button class="btn-main" onclick="goCreate()">
+      <div class="bmi">+</div>
+      <div class="bmt"><div>Nouvelle fiche VT</div><div class="bms">5 étapes · synchronisation auto</div></div>
+    </button>
+  </div>
+  <div class="sp" style="padding-top:8px">
+    <div id="install-prompt" style="display:none">
+      <div class="install-card">
+        <div class="ic-icon">📲</div>
+        <div class="ic-body">
+          <div class="ic-title">Installer l'application</div>
+          <div class="ic-sub">Ajoutez SPOI VT à votre écran d'accueil pour l'utiliser hors-ligne</div>
+          <button class="ic-btn" onclick="installApp()">Installer ⬇</button>
+        </div>
+      </div>
+    </div>
+    <div class="stl">Fiches du jour</div>
+    <div id="rlist"></div>
+    <div id="empty" style="text-align:center;padding:24px;color:var(--txt3);font-size:13px;display:none">Aucune fiche aujourd'hui.</div>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div class="screen" id="s-create">
+  <div class="shdr">
+    <button class="back" onclick="goHome()">←</button>
+    <div class="stitle" id="ctitle">Étape 1 — Équipement</div>
+    <div class="sind" id="sind">1 / 5</div>
+  </div>
+  <div class="stepbar">
+    <div class="sd act" id="d1"></div><div class="sd" id="d2"></div>
+    <div class="sd" id="d3"></div><div class="sd" id="d4"></div><div class="sd" id="d5"></div>
+  </div>
+  <div class="scnt active" id="s1">
+    <div class="flbl">Type d'équipement <span>*</span></div>
+    <input class="sinput" type="text" placeholder="Rechercher..." oninput="fEq(this.value)" id="eqsearch">
+    <div class="eqgrid" id="eqgrid"></div>
+  </div>
+  <div class="scnt" id="s2">
+    <div class="loc-wrap">
+      <div><div class="flbl">Zone <span>*</span></div>
+        <select class="sel-field" id="f-zone" onchange="onZone()">
+          <option value="">— Sélectionner la zone —</option>
+          <option>Zone Casablanca</option><option>Zone Rabat</option>
+          <option>Zone Kenitra</option><option>Zone Settat</option>
+        </select></div>
+      <div><div class="flbl">Gare <span>*</span></div>
+        <select class="sel-field" id="f-gare" onchange="onGare()" disabled>
+          <option value="">— Sélectionner d'abord la zone —</option>
+        </select></div>
+      <div><div class="flbl">Point kilométrique <span>*</span></div>
+        <div class="pk-row"><span class="pk-pre">PK</span>
+        <input class="pk-in" type="text" placeholder="ex: 0+340" id="f-pk" oninput="chkS2()" maxlength="8"></div></div>
+      <div><div class="flbl">ID Terrain <span>*</span></div>
+        <input class="idinput" type="text" placeholder="ex: Ag-11A" id="f-terrain" oninput="chkS2()"></div>
+      <div><div class="flbl">Voie <span>*</span></div>
+        <input class="voie-free" type="text" placeholder="ex: V11, H, G..." id="f-voie" oninput="chkS2()" maxlength="10" autocomplete="off" spellcheck="false">
+        <div class="voie-hint">Saisissez le numéro ou la lettre de la voie</div></div>
+      <div><div class="flbl">Vérificateur <span>*</span></div>
+        <input class="vinput" type="text" placeholder="Nom complet" id="f-verif" oninput="chkS2()"></div>
+      <div id="loc-sum" class="loc-sum"></div>
+    </div>
+  </div>
+  <div class="scnt" id="s3">
+    <div class="photo-section">
+      <div class="pt-title"><span class="badge-i">ÉTAT INITIAL</span></div>
+      <div class="pgrid" id="pg-init"><div class="padd" onclick="tP('init')"><div class="padd-i">📷</div><div class="padd-l">Prendre photo</div></div></div>
+      <div class="pcnt" id="pc-init">0 / 4 photos</div>
+    </div>
+    <div class="photo-section">
+      <div class="pt-title"><span class="badge-n">NON-CONFORMITÉ</span></div>
+      <div class="pgrid" id="pg-nc"><div class="padd" onclick="tP('nc')"><div class="padd-i">⚠</div><div class="padd-l">Photo défaut</div></div></div>
+      <div class="pcnt" id="pc-nc">0 / 4 photos</div>
+    </div>
+    <input type="file" id="fi-init" accept="image/*" capture="environment" multiple onchange="addP('init',this)">
+    <input type="file" id="fi-nc" accept="image/*" capture="environment" multiple onchange="addP('nc',this)">
+  </div>
+  <div class="scnt" id="s4" style="padding:0">
+    <div class="pts-hdr">
+      <div><div class="pts-eq" id="pts-eq">—</div><div class="pts-ct" id="pts-ct">0 / 0</div></div>
+      <div id="pts-nc-lbl" style="font-size:12px;color:var(--red);font-weight:700"></div>
+    </div>
+    <div class="pts-prog"><div class="pts-pf" id="pts-pf" style="width:0%"></div></div>
+    <div id="ptslist"></div>
+    <div style="padding:16px;background:var(--bg)">
+      <div class="flbl">Observations</div>
+      <textarea class="obs-area" id="f-obs" placeholder="Notes, valeurs, remarques..."></textarea>
+    </div>
+  </div>
+  <div class="scnt" id="s5">
+    <div class="flbl">Signature</div>
+    <canvas class="sig-c" id="sigc" width="440" height="150"></canvas>
+    <div class="sig-h" id="sigh">Signez dans le cadre</div>
+    <button class="clr-sig" onclick="clrSig()">Effacer</button>
+    <div class="recap-c" id="recap"></div>
+  </div>
+  <div class="bot"><button class="btn-n" id="btn-n" onclick="nxt()" disabled>Continuer →</button></div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="s-ok">
+  <div class="suc-wrap">
+    <div class="suc-ic">✓</div>
+    <div class="suc-t">Fiche enregistrée</div>
+    <div id="rbwrap"></div>
+    <div class="suc-s" id="suc-s"></div>
+    <div class="email-card" id="email-card">
+      <div class="email-card-title">📧 Synchroniser avec SharePoint</div>
+      <div class="email-card-sub">Cliquez pour envoyer la fiche par email — Power Automate l'enregistre automatiquement dans SharePoint FichesVT.</div>
+      <button class="btn-email" id="btn-email" onclick="envoyerEmail()">Envoyer vers SharePoint ⚡</button>
+    </div>
+    <div class="recap-c" id="suc-rc"></div>
+    <button class="btn-n btn-sv" style="margin-top:16px" onclick="goHome()">Nouvelle fiche VT</button>
+    <button class="btn-ol" onclick="goHome()">Retour accueil</button>
+  </div>
+</div>
+
+</div></div>
+<script>
+var ZONES={"Zone Casablanca":["Casa-Port","Casa-Voyageurs","Ain Sebaa","Roches Noires","Sidi Moumen"],"Zone Rabat":["Rabat-Ville","Rabat-Agdal","Salé"],"Zone Kenitra":["Kenitra","Sidi Slimane"],"Zone Settat":["Settat","Berrechid"]};
+var EQ=[
+  {k:"mec",ic:"⚙",n:"Mécanisme aiguille",dom:{"Implantation":["Emplacement / plan de pose","Respect gabarit"],"Pose":["Fixations mécanisme","Dégagement ballast"],"Mesures":["Course de manœuvre (mm)|mm"],"Opérations":["Cadenassement SVM","Fonctionnement moteur"]}},
+  {k:"cit",ic:"🛤",n:"Circuit de voie ITE",dom:{"Implantation":["Emplacement","Longueur zone (m)|m"],"Conformité":["Raccordements rails","Continuité conducteurs"],"Mesures":["Résistances (Ω)|Ω"]}},
+  {k:"sig",ic:"🚦",n:"Signal lumineux",dom:{"Implantation":["Emplacement","Distance point protégé (m)|m"],"Mesures":["Tension lampes (V)|V"],"Opérations":["Visibilité","Allumage diodes"]}},
+  {k:"mas",ic:"🏗",n:"Massif signal",dom:{"Implantation":["Emplacement","Distance (m)|m"],"Mesures":["Profondeur (mm)|mm","Température (°C)|°C"]}},
+  {k:"eb",ic:"📡",n:"Eurobalise",dom:{"Implantation":["Emplacement PK","Espacement (mm)|mm"],"Mesures":["Cotes pose (mm)|mm","Isolement (MΩ)|MΩ"]}},
+  {k:"arm",ic:"🗄",n:"Armoire extérieure",dom:{"Pose":["Fixation et scellement"],"Mesures":["Prise de terre (Ω)|Ω"],"Opérations":["Cadenassement"]}},
+  {k:"cab",ic:"🔌",n:"Câbles",dom:{"Conformité":["Étiquettes","Raccordements"],"Mesures":["Isolement (MΩ)|MΩ"]}},
+  {k:"stm",ic:"📦",n:"STM / Coffret SIG",dom:{"Pose":["Fixation STM"],"Mesures":["Prise de terre (Ω)|Ω"],"Opérations":["Cadenassement"]}},
+];
+
+// Config email SharePoint
+var SP_EMAIL = "othmane.hmidani@alstomgroup.com";
+
+var S={step:1,equip:null,zone:'',gare:'',pk:'',terrain:'',voie:'',verif:'',ops:{},vals:{},obs:'',pI:[],pNC:[],sigHas:false,fiches:[]};
+var sigCtx=null,sigDrw=false;
+var deferredPrompt=null;
+var currentFiche=null;
+
+function $(i){return document.getElementById(i);}
+
+// ── PWA ──────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(function(reg){
+    console.log('[PWA] Service Worker enregistré');
+  }).catch(function(err){console.log('[PWA] SW erreur:',err);});
+}
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-prompt').style.display='block';
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('install-prompt').style.display='none';
+  deferredPrompt=null;
+});
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;});}
+}
+
+// ── RÉSEAU ───────────────────────────────────────────────────
+function updateNetwork(){
+  var on=navigator.onLine;
+  $('net-badge').textContent=on?'● En ligne':'● Hors ligne';
+  $('net-badge').className='net-badge '+(on?'net-on':'net-off');
+  $('offline-bar').classList.toggle('show',!on);
+  if(on)syncPending();
+}
+window.addEventListener('online',updateNetwork);
+window.addEventListener('offline',updateNetwork);
+
+function syncPending(){
+  var pending=S.fiches.filter(function(f){return!f.synced;});
+  if(pending.length>0){
+    $('pend-badge').style.display='block';
+    $('pend-badge').textContent=pending.length+' en attente';
+  } else {
+    $('pend-badge').style.display='none';
+  }
+}
+
+// ── EMAIL VERS SHAREPOINT ─────────────────────────────────────
+function envoyerEmail(){if(!currentFiche)return;var f=currentFiche;var j={"Titre":f.id,"Equipement":f.equip,"Zone":f.zone,"Gare":f.gare,"Voie":f.voie,"PK":f.pk,"IDTerrain":f.terrain,"Verificateur":f.verif,"Statut":f.statut,"NbPointsC":f.c,"NbPointsNC":f.nc,"NbPointsNA":f.na,"Observations":f.obs||"","DateFiche":f.date+" "+f.heure};var b64=btoa(unescape(encodeURIComponent(JSON.stringify(j))));var subj='[SPOI-VT] '+f.id+' | '+f.statut+' | '+f.equip+' | '+f.gare+' | DATA:'+b64;var bod='Fiche VT ONCF CSP Phase 1 - N:'+f.id+' Statut:'+f.statut+' Equip:'+f.equip+' Zone:'+f.zone+' Gare:'+f.gare+' Voie:'+f.voie+' Verif:'+f.verif+' C:'+f.c+' NC:'+f.nc+' NA:'+f.na;window.location.href='mailto:'+SP_EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(bod);f.synced=true;rHome();syncPending();$('btn-email').textContent='✓ Email ouvert';$('btn-email').style.background='var(--green)';$('btn-email').disabled=true;}
+
+// ── DATE ─────────────────────────────────────────────────────
+function updateDate(){
+  var d=new Date();
+  var dn=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var mn=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  $('tday').textContent=dn[d.getDay()]+' '+d.getDate()+' '+mn[d.getMonth()]+' '+d.getFullYear();
+}
+
+// ── ÉQUIPEMENTS ───────────────────────────────────────────────
+function rEqGrid(f){
+  var list=f?EQ.filter(function(e){return e.n.toLowerCase().indexOf(f.toLowerCase())>-1;}):EQ;
+  $('eqgrid').innerHTML=list.map(function(e){
+    var sel=S.equip&&S.equip.k===e.k;
+    return '<button class="eqbtn'+(sel?' sel':'')+'" onclick="selEq(\''+e.k+'\')">'+
+      '<div class="eqi">'+e.ic+'</div><div class="eqn">'+e.n+'</div></button>';
+  }).join('');
+}
+function fEq(v){rEqGrid(v);}
+function selEq(k){S.equip=EQ.find(function(e){return e.k===k;});S.ops={};S.vals={};rEqGrid($('eqsearch').value);$('btn-n').disabled=false;}
+
+// ── LOCALISATION ──────────────────────────────────────────────
+function onZone(){S.zone=$('f-zone').value;$('f-zone').className=S.zone?'sel-field has-value':'sel-field';var gg=$('f-gare');gg.disabled=!S.zone;gg.className='sel-field';gg.innerHTML='<option value="">— Sélectionner la gare —</option>';if(S.zone&&ZONES[S.zone])ZONES[S.zone].forEach(function(g){gg.innerHTML+='<option>'+g+'</option>';});S.gare='';chkS2();}
+function onGare(){S.gare=$('f-gare').value;$('f-gare').className=S.gare?'sel-field has-value':'sel-field';chkS2();updSum();}
+function chkS2(){S.zone=$('f-zone').value;S.gare=$('f-gare').value;S.pk=$('f-pk').value.trim();S.terrain=$('f-terrain').value.trim();S.voie=$('f-voie').value.trim().toUpperCase();S.verif=$('f-verif').value.trim();$('btn-n').disabled=!(S.zone&&S.gare&&S.pk&&S.terrain&&S.voie&&S.verif);updSum();}
+function updSum(){var s=$('loc-sum');if(S.zone&&S.gare){s.style.display='block';s.innerHTML='<strong>'+S.zone+'</strong> → <strong>'+S.gare+'</strong>'+(S.pk?' → PK <strong>'+S.pk+'</strong>':'')+(S.voie?' · Voie <strong>'+S.voie+'</strong>':'');}else{s.style.display='none';}}
+
+// ── PHOTOS ────────────────────────────────────────────────────
+function tP(t){$('fi-'+t).click();}
+function addP(t,inp){var arr=t==='init'?S.pI:S.pNC;Array.from(inp.files).slice(0,4-arr.length).forEach(function(f){arr.push({url:URL.createObjectURL(f),name:f.name});});rPG(t);inp.value='';}
+function rPG(t){var arr=t==='init'?S.pI:S.pNC;var g=$('pg-'+t);var c=$('pc-'+t);var html=arr.map(function(p,i){return'<div class="pthumb"><img src="'+p.url+'"><button class="pdel" onclick="delP(\''+t+'\','+i+')">×</button></div>';}).join('');if(arr.length<4)html+='<div class="padd" onclick="tP(\''+t+'\')"><div class="padd-i">'+(t==='init'?'📷':'⚠')+'</div><div class="padd-l">Ajouter</div></div>';g.innerHTML=html;c.textContent=arr.length+' / 4 photos';}
+function delP(t,i){var arr=t==='init'?S.pI:S.pNC;arr.splice(i,1);rPG(t);}
+
+// ── POINTS ────────────────────────────────────────────────────
+function hasV(pt){return pt.indexOf('|')>-1;}function ptL(pt){return pt.split('|')[0];}function ptU(pt){return pt.split('|')[1]||'';}
+function escQ(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function buildPts(){
+  if(!S.equip)return;var html='';var n=0;
+  Object.keys(S.equip.dom).forEach(function(d){
+    html+='<div class="dom-t">'+d+'</div>';
+    S.equip.dom[d].forEach(function(pt){
+      n++;var key=pt;var st=S.ops[key]||'';var hv=hasV(pt);var lbl=ptL(pt);var unit=ptU(pt);
+      var cc=st==='C'?'pt-c':st==='NC'?'pt-nc':st==='NA'?'pt-na':'';
+      var valIn=hv?'<div class="pt-val-row"><input class="pt-val-in" type="number" placeholder="—" value="'+(S.vals[key]||'')+'" oninput="setV(this,\''+escQ(key)+'\')" inputmode="decimal"><span class="pt-unit">'+unit+'</span></div>':'';
+      html+='<div class="ptr '+cc+'"><div class="pt-num">'+n+'</div><div class="pt-body"><div class="pt-nm">'+lbl+'</div>'+valIn+'</div><div class="pt-btns"><button class="ptb ptc'+(st==='C'?' sel':'')+'" onclick="setPt(this,\''+escQ(key)+'\',\'C\')">C</button><button class="ptb ptnc'+(st==='NC'?' sel':'')+'" onclick="setPt(this,\''+escQ(key)+'\',\'NC\')">NC</button><button class="ptb ptna'+(st==='NA'?' sel':'')+'" onclick="setPt(this,\''+escQ(key)+'\',\'NA\')">NA</button></div></div>';
+    });
+  });
+  $('ptslist').innerHTML=html;updPts();
+}
+function setPt(btn,key,val){btn.closest('.ptr').querySelectorAll('.ptb').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');btn.closest('.ptr').className='ptr '+(val==='C'?'pt-c':val==='NC'?'pt-nc':val==='NA'?'pt-na':'');S.ops[key]=val;updPts();}
+function setV(inp,key){S.vals[key]=inp.value;}
+function updPts(){var all=[];Object.values(S.equip.dom).forEach(function(a){all=all.concat(a);});var tot=all.length;var done=Object.keys(S.ops).length;var nc=Object.values(S.ops).filter(function(v){return v==='NC';}).length;$('pts-ct').textContent=done+' / '+tot+' pointés';$('pts-nc-lbl').textContent=nc>0?nc+' NC':'';$('pts-pf').style.width=(tot>0?Math.round(done/tot*100):0)+'%';$('btn-n').disabled=done===0;}
+
+// ── SIGNATURE ─────────────────────────────────────────────────
+function initSig(){var c=$('sigc');c.width=c.offsetWidth||440;sigCtx=c.getContext('2d');sigCtx.strokeStyle='#1A2535';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';function gp(e){var r=c.getBoundingClientRect();var s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(c.width/r.width),y:(s.clientY-r.top)*(c.height/r.height)};}c.addEventListener('mousedown',function(e){sigDrw=true;var p=gp(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);});c.addEventListener('mousemove',function(e){if(!sigDrw)return;var p=gp(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();setSig(true);});c.addEventListener('mouseup',function(){sigDrw=false;});c.addEventListener('touchstart',function(e){e.preventDefault();sigDrw=true;var p=gp(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);},{passive:false});c.addEventListener('touchmove',function(e){e.preventDefault();if(!sigDrw)return;var p=gp(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();setSig(true);},{passive:false});c.addEventListener('touchend',function(){sigDrw=false;});}
+function setSig(has){S.sigHas=has;$('sigc').className=has?'sig-c has-sig':'sig-c';$('sigh').textContent=has?'✓ Signature enregistrée':'Signez dans le cadre';$('btn-n').disabled=!has;}
+function clrSig(){if(sigCtx)sigCtx.clearRect(0,0,$('sigc').width,$('sigc').height);setSig(false);}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function goCreate(){S.step=1;S.equip=null;S.zone='';S.gare='';S.pk='';S.terrain='';S.voie='';S.verif='';S.ops={};S.vals={};S.obs='';S.pI=[];S.pNC=[];S.sigHas=false;$('eqsearch').value='';$('f-zone').value='';$('f-zone').className='sel-field';var gg=$('f-gare');gg.disabled=true;gg.className='sel-field';gg.innerHTML='<option value="">— Sélectionner d\'abord la zone —</option>';$('f-pk').value='';$('f-terrain').value='';$('f-voie').value='';$('f-verif').value='';$('f-obs').value='';$('loc-sum').style.display='none';rEqGrid('');rPG('init');rPG('nc');showScr('s-create');setStep(1);}
+function goHome(){showScr('s-home');rHome();}
+function showScr(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});$(id).classList.add('active');}
+function setStep(n){S.step=n;var titles=['','Étape 1 — Équipement','Étape 2 — Localisation','Étape 3 — Photos','Étape 4 — Points de contrôle','Étape 5 — Signature'];$('ctitle').textContent=titles[n];$('sind').textContent=n+' / 5';document.querySelectorAll('.scnt').forEach(function(s){s.classList.remove('active');});$('s'+n).classList.add('active');[1,2,3,4,5].forEach(function(i){$('d'+i).className='sd'+(i<n?' done':i===n?' act':'');});var bn=$('btn-n');bn.className='btn-n';bn.textContent='Continuer →';bn.disabled=true;if(n===1)bn.disabled=!S.equip;else if(n===2)chkS2();else if(n===3){bn.disabled=false;}else if(n===4){$('pts-eq').textContent=S.equip.n;buildPts();bn.disabled=Object.keys(S.ops).length===0;}else if(n===5){buildRecap();setTimeout(initSig,80);bn.textContent='Enregistrer la fiche ✓';bn.className='btn-n btn-sv';bn.disabled=!S.sigHas;setSig(S.sigHas);}}
+function nxt(){if(S.step===4)S.obs=$('f-obs')?$('f-obs').value:'';if(S.step<5)setStep(S.step+1);else save();}
+
+// ── SAVE ──────────────────────────────────────────────────────
+function save(){
+  var all=[];Object.values(S.equip.dom).forEach(function(a){all=all.concat(a);});
+  var tot=all.length;var nc=Object.values(S.ops).filter(function(v){return v==='NC';}).length;
+  var c=Object.values(S.ops).filter(function(v){return v==='C';}).length;
+  var na=Object.values(S.ops).filter(function(v){return v==='NA';}).length;
+  var stat=nc>0?'Non-Conforme':Object.keys(S.ops).length>0?'Conforme':'En cours';
+  var now=new Date();
+  var f={id:'VT-'+String(Date.now()).slice(-5),equip:S.equip.n,terrain:S.terrain,voie:S.voie,zone:S.zone,gare:S.gare,pk:S.pk,verif:S.verif,date:now.toLocaleDateString('fr-FR'),heure:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),statut:stat,tot:tot,c:c,nc:nc,na:na,obs:S.obs||'',pI:S.pI.length,pNC:S.pNC.length,synced:false};
+  currentFiche=f;
+  S.fiches.unshift(f);updKPIs();
+  // Reset email button
+  $('btn-email').textContent='Envoyer vers SharePoint ⚡';
+  $('btn-email').style.background='var(--blue)';
+  $('btn-email').disabled=false;
+  $('suc-s').textContent=nc>0?'⚠ '+nc+' NC détectée(s) — Envoyez l\'email pour alerter l\'équipe.':'Fiche enregistrée localement. Envoyez l\'email pour synchroniser avec SharePoint.';
+  $('rbwrap').innerHTML='<div class="rb '+(nc>0?'rbnc':'rbc')+'">'+stat+'</div>';
+  $('suc-rc').innerHTML='<div class="rc-row"><span class="rc-k">N° Fiche</span><span class="rc-v" style="font-family:monospace">'+f.id+'</span></div><div class="rc-row"><span class="rc-k">Zone → Gare</span><span class="rc-v">'+f.zone+' → '+f.gare+'</span></div><div class="rc-row"><span class="rc-k">Équipement</span><span class="rc-v">'+f.equip+'</span></div><div class="rc-row"><span class="rc-k">Résultat</span><span class="rc-v" style="color:'+(nc>0?'var(--red)':'var(--green)')+'">'+f.c+' C · '+f.nc+' NC · '+f.na+' NA</span></div><div class="rc-row"><span class="rc-k">Vérificateur</span><span class="rc-v">'+f.verif+'</span></div>';
+  showScr('s-ok');
+  // Sauvegarder dans localStorage
+  try{localStorage.setItem('spoi_vt_fiches',JSON.stringify(S.fiches));}catch(e){}
+}
+
+function buildRecap(){var all=[];Object.values(S.equip.dom).forEach(function(a){all=all.concat(a);});var tot=all.length;var nc=Object.values(S.ops).filter(function(v){return v==='NC';}).length;var c=Object.values(S.ops).filter(function(v){return v==='C';}).length;var na=Object.values(S.ops).filter(function(v){return v==='NA';}).length;var stat=nc>0?'Non-Conforme':Object.keys(S.ops).length>0?'Conforme':'En cours';$('recap').innerHTML='<div class="rc-row"><span class="rc-k">Équipement</span><span class="rc-v">'+S.equip.n+'</span></div><div class="rc-row"><span class="rc-k">Localisation</span><span class="rc-v">'+S.gare+' · PK '+S.pk+'</span></div><div class="rc-row"><span class="rc-k">Résultat prévu</span><span class="rc-v" style="color:'+(nc>0?'var(--red)':'var(--green)')+'">'+stat+'</span></div>';}
+function updKPIs(){var td=new Date().toLocaleDateString('fr-FR');var tf=S.fiches.filter(function(f){return f.date===td;});$('kc').textContent=tf.filter(function(f){return f.statut==='Conforme';}).length;$('knc').textContent=tf.filter(function(f){return f.statut==='Non-Conforme';}).length;$('kip').textContent=tf.filter(function(f){return f.statut==='En cours';}).length;}
+function rHome(){var list=$('rlist');var empty=$('empty');if(S.fiches.length===0){list.innerHTML='';empty.style.display='block';return;}empty.style.display='none';list.innerHTML=S.fiches.slice(0,5).map(function(f){var sc=f.statut==='Conforme'?'stc':f.statut==='Non-Conforme'?'stnc':'stip';var pct=f.tot>0?Math.round((f.c+f.nc)/f.tot*100):0;return'<div class="fc"><div class="fc-t"><span class="fc-id">'+f.id+'</span><span class="fc-st '+sc+'">'+f.statut+'</span></div><div class="fc-eq">'+f.equip+' <span style="font-size:11px;font-family:monospace;color:var(--txt2)">'+f.terrain+'</span></div><div class="fc-m">'+f.verif+' · '+f.heure+'</div><div class="fc-loc">'+f.zone+' → '+f.gare+' · Voie '+f.voie+'</div><div class="fc-sync '+(f.synced?'sync-ok':'sync-pend')+'">'+(f.synced?'☁ Synchronisé SharePoint':'📧 En attente d\'envoi email')+'</div><div class="pbar-bg"><div class="pbar-f" style="width:'+pct+'%"></div></div></div>';}).join('');}
+
+// Charger fiches sauvegardées
+try{var saved=localStorage.getItem('spoi_vt_fiches');if(saved){S.fiches=JSON.parse(saved);updKPIs();}}catch(e){}
+
+updateDate();updateNetwork();rHome();rEqGrid('');
+</script>
+</body>
+</html>
