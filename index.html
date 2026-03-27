@@ -307,7 +307,7 @@ input[type=file]{display:none}
     <div class="email-card" id="email-card">
       <div class="email-card-title">📧 Synchroniser avec SharePoint</div>
       <div class="email-card-sub">Cliquez pour envoyer la fiche par email — Power Automate l'enregistre automatiquement dans SharePoint FichesVT.</div>
-      <button class="btn-email" id="btn-email" onclick="envoyerEmail()">Envoyer vers SharePoint ⚡</button>
+      <button class="btn-email" id="btn-email" onclick="envoyerEmail()">Enregistrer dans Supabase ⚡</button>
     </div>
     <div class="recap-c" id="suc-rc"></div>
     <button class="btn-n btn-sv" style="margin-top:16px" onclick="goHome()">Nouvelle fiche VT</button>
@@ -331,6 +331,8 @@ var EQ=[
 
 // Config email SharePoint
 var SP_EMAIL = "othmane.hmidani@alstomgroup.com";
+var SUPABASE_URL = "https://kkixktqinfxlkaolslvv.supabase.co";
+var SUPABASE_KEY = "sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3";
 
 var S={step:1,equip:null,zone:'',gare:'',pk:'',terrain:'',voie:'',verif:'',ops:{},vals:{},obs:'',pI:[],pNC:[],sigHas:false,fiches:[]};
 var sigCtx=null,sigDrw=false;
@@ -379,7 +381,79 @@ function syncPending(){
 }
 
 // ── EMAIL VERS SHAREPOINT ─────────────────────────────────────
-function envoyerEmail(){if(!currentFiche)return;var f=currentFiche;var j={"Titre":f.id,"Equipement":f.equip,"Zone":f.zone,"Gare":f.gare,"Voie":f.voie,"PK":f.pk,"IDTerrain":f.terrain,"Verificateur":f.verif,"Statut":f.statut,"NbPointsC":f.c,"NbPointsNC":f.nc,"NbPointsNA":f.na,"Observations":f.obs||"","DateFiche":f.date+" "+f.heure};var b64=btoa(unescape(encodeURIComponent(JSON.stringify(j))));var subj='[SPOI-VT] '+f.id+' | '+f.statut+' | '+f.equip+' | '+f.gare+' | DATA:'+b64;var bod='Fiche VT ONCF CSP Phase 1 - N:'+f.id+' Statut:'+f.statut+' Equip:'+f.equip+' Zone:'+f.zone+' Gare:'+f.gare+' Voie:'+f.voie+' Verif:'+f.verif+' C:'+f.c+' NC:'+f.nc+' NA:'+f.na;window.location.href='mailto:'+SP_EMAIL+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(bod);f.synced=true;rHome();syncPending();$('btn-email').textContent='✓ Email ouvert';$('btn-email').style.background='var(--green)';$('btn-email').disabled=true;}
+function envoyerEmail(){
+  if(!currentFiche)return;
+  var f=currentFiche;
+  
+  // Bouton devient "En cours..."
+  var btn=$('btn-email');
+  btn.textContent='⏳ Envoi en cours...';
+  btn.disabled=true;
+  btn.style.background='var(--amb)';
+  
+  var data={
+    titre:f.id, equipement:f.equip, zone:f.zone, gare:f.gare,
+    voie:f.voie, pk:f.pk, id_terrain:f.terrain, verificateur:f.verif,
+    statut:f.statut, nb_points_c:f.c, nb_points_nc:f.nc, nb_points_na:f.na,
+    observations:f.obs||'', date_fiche:f.date, heure_fiche:f.heure
+  };
+
+  fetch(SUPABASE_URL+'/rest/v1/fiches_vt', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SUPABASE_KEY,
+      'Authorization':'Bearer '+SUPABASE_KEY,
+      'Prefer':'return=representation'
+    },
+    body:JSON.stringify(data)
+  })
+  .then(function(r){return r.json();})
+  .then(function(result){
+    if(result && result[0] && result[0].id){
+      f.synced=true;
+      f.supabase_id=result[0].id;
+      btn.textContent='✓ Enregistré dans Supabase #'+result[0].id;
+      btn.style.background='var(--green)';
+      rHome();syncPending();
+      // Si NC — créer automatiquement une NCR
+      if(f.statut==='Non-Conforme'){
+        createNCR(f, result[0].id);
+      }
+    } else {
+      btn.textContent='⚠ Erreur — réessayez';
+      btn.style.background='var(--red)';
+      btn.disabled=false;
+      console.error('Supabase error:', result);
+    }
+  })
+  .catch(function(err){
+    btn.textContent='⚠ Erreur réseau — réessayez';
+    btn.style.background='var(--red)';
+    btn.disabled=false;
+    console.error('Fetch error:', err);
+  });
+}
+
+function createNCR(f, ficheId){
+  var ncr={
+    fiche_vt_id:ficheId,
+    titre:'NCR-'+f.id,
+    equipement:f.equip,
+    id_terrain:f.terrain,
+    zone:f.zone, gare:f.gare, voie:f.voie,
+    criticite:'Mineure',
+    statut:'Ouverte',
+    description:'Non-conformité détectée — '+f.nc+' point(s) NC',
+    ouvert_par:f.verif,
+    date_ouverture:f.date
+  };
+  fetch(SUPABASE_URL+'/rest/v1/ncr_reserves',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+    body:JSON.stringify(ncr)
+  }).then(function(r){console.log('NCR créée automatiquement');});
+}
 
 // ── DATE ─────────────────────────────────────────────────────
 function updateDate(){
@@ -457,7 +531,7 @@ function save(){
   currentFiche=f;
   S.fiches.unshift(f);updKPIs();
   // Reset email button
-  $('btn-email').textContent='Envoyer vers SharePoint ⚡';
+  $('btn-email').textContent='Enregistrer dans Supabase ⚡';
   $('btn-email').style.background='var(--blue)';
   $('btn-email').disabled=false;
   $('suc-s').textContent=nc>0?'⚠ '+nc+' NC détectée(s) — Envoyez l\'email pour alerter l\'équipe.':'Fiche enregistrée localement. Envoyez l\'email pour synchroniser avec SharePoint.';
