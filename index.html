@@ -616,7 +616,47 @@ Cette action est irréversible.'))return;
 // Charger fiches sauvegardées
 try{var saved=localStorage.getItem('spoi_vt_fiches');if(saved){S.fiches=JSON.parse(saved);updKPIs();}}catch(e){}
 
-updateDate();updateNetwork();rHome();rEqGrid('');
+
+function loadFichesFromSupabase(){
+  fetch(SUPABASE_URL+'/rest/v1/fiches_vt?order=created_at.desc&limit=20',{
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data||!data.length){rHome();return;}
+    // Convertir les données Supabase au format interne
+    S.fiches=data.map(function(f){
+      return {
+        id:f.titre||('VT-'+f.id),
+        equip:f.equipement||'',
+        terrain:f.id_terrain||'',
+        voie:f.voie||'',
+        zone:f.zone||'',
+        gare:f.gare||'',
+        pk:f.pk||'',
+        verif:f.verificateur||'',
+        statut:f.statut||'En cours',
+        c:f.nb_points_c||0,
+        nc:f.nb_points_nc||0,
+        na:f.nb_points_na||0,
+        obs:f.observations||'',
+        date:f.date_fiche||'',
+        heure:f.heure_fiche||'',
+        tot:(f.nb_points_c||0)+(f.nb_points_nc||0)+(f.nb_points_na||0),
+        synced:true,
+        supabase_id:f.id
+      };
+    });
+    updKPIs();
+    rHome();
+  })
+  .catch(function(e){
+    console.log('Erreur chargement Supabase:',e);
+    rHome();
+  });
+}
+updateDate();updateNetwork();rEqGrid('');
+loadFichesFromSupabase();
 </script>
 </body>
 </html>
