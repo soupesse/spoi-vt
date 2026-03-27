@@ -1,12 +1,136 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>SPOI VT — Module 03 · NCR</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.topbar{background:#D93025;padding:10px 16px;display:flex;align-items:center;gap:12px}.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none}.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7;margin-top:1px}.content{padding:16px;max-width:800px;margin:0 auto}.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}.kv{font-size:22px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}.kr{color:#D93025}.ka{color:#C97A00}.kg{color:#0D9E5C}.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}.ncr-item{padding:12px 16px;border-bottom:1px solid #EEF2F7}.ncr-item:last-child{border-bottom:none}.ncr-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}.ncr-id{font-size:11px;font-family:monospace;font-weight:700;background:#EEF2F7;padding:2px 8px;border-radius:4px}.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}.bc{background:#FEE8E6;color:#B02018}.bm{background:#FFF4E0;color:#9E5F00}.bo{background:#FEE8E6;color:#B02018}.bt{background:#FFF4E0;color:#9E5F00}.bv{background:#E6F9F1;color:#0A7A47}.ncr-desc{font-size:13px;font-weight:600;margin-bottom:4px}.ncr-meta{font-size:11px;color:#7A90A4}.delai-bar{display:flex;align-items:center;gap:8px;padding:6px 16px;background:#F8FAFC;border-top:1px solid #EEF2F7}.dl-label{font-size:10px;color:#7A90A4;font-weight:600}.dl-track{flex:1;height:5px;background:#EEF2F7;border-radius:3px;overflow:hidden}.dl-fill{height:5px;border-radius:3px}.dl-val{font-size:10px;font-weight:700}</style></head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT — Module 03 · NCR</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.topbar{background:#D93025;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-title{font-size:14px;font-weight:700;color:#fff}
+.tb-sub{font-size:10px;color:rgba(255,255,255,.7)}
+.sync-badge{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700}
+.content{padding:14px;max-width:800px;margin:0 auto}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
+.kv{font-size:22px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
+.kr{color:#D93025}.ka{color:#C97A00}.kg{color:#0D9E5C}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-hdr{padding:10px 14px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:12px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.ncr-item{padding:12px 14px;border-bottom:1px solid #EEF2F7}
+.ncr-item:last-child{border-bottom:none}
+.ncr-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.ncr-id{font-size:11px;font-family:monospace;font-weight:700;background:#EEF2F7;padding:2px 8px;border-radius:4px}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.bc{background:#FEE8E6;color:#B02018}.bm{background:#FFF4E0;color:#9E5F00}
+.bo{background:#FEE8E6;color:#B02018}.bt{background:#FFF4E0;color:#9E5F00}.bv{background:#E6F9F1;color:#0A7A47}
+.ncr-desc{font-size:13px;font-weight:600;margin-bottom:4px}
+.ncr-meta{font-size:11px;color:#7A90A4}
+.delai-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#F8FAFC;border-top:1px solid #EEF2F7}
+.dl-label{font-size:10px;color:#7A90A4;font-weight:600;white-space:nowrap}
+.dl-track{flex:1;height:5px;background:#EEF2F7;border-radius:3px;overflow:hidden}
+.dl-fill{height:5px;border-radius:3px}
+.dl-val{font-size:10px;font-weight:700;white-space:nowrap}
+.empty{text-align:center;padding:32px;color:#7A90A4}
+.loading{text-align:center;padding:20px;color:#1A6FE8;font-size:13px}
+.btn-add{background:#D93025;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer}
+</style>
+</head>
 <body>
-<div class="topbar"><a class="back-btn" href="https://soupesse.github.io/spoi-vt/portail.html" target="_blank">← Portail</a><div class="tb-info"><div class="tb-title">Module 03 — NCR / Réserves</div><div class="tb-sub">Délai contractuel : 5 jours ouvrables</div></div></div>
-<div class="content">
-<div class="krow"><div class="ki"><div class="kv kr">17</div><div class="kl">Ouvertes</div></div><div class="ki"><div class="kv ka">3</div><div class="kl">En traitement</div></div><div class="ki"><div class="kv kg">3</div><div class="kl">Levées</div></div><div class="ki"><div class="kv kr">3</div><div class="kl">Hors délai</div></div></div>
-<div class="card">
-<div class="ncr-item"><div class="ncr-top"><span class="ncr-id">NCR-017</span><span class="badge bc">Critique</span><span class="badge bo">Ouverte</span></div><div class="ncr-desc">Défaut d'isolement conducteurs — CV-H21</div><div class="ncr-meta">Circuit de voie ITE · Casa-Port · H · Ouvert par M. Eddahbi le 15-03-2026</div><div class="delai-bar"><span class="dl-label">Délai 5j</span><div class="dl-track"><div class="dl-fill" style="width:20%;background:#0D9E5C"></div></div><span class="dl-val" style="color:#0D9E5C">1j restant</span></div></div>
-<div class="ncr-item"><div class="ncr-top"><span class="ncr-id">NCR-016</span><span class="badge bc">Critique</span><span class="badge bt">En traitement</span></div><div class="ncr-desc">Horizontalité hors tolérance — MS-F08</div><div class="ncr-meta">Massif signal · Casa-Voyageurs · F · Ouvert par M. Benali le 13-03-2026</div><div class="delai-bar"><span class="dl-label">Délai 5j</span><div class="dl-track"><div class="dl-fill" style="width:60%;background:#C97A00"></div></div><span class="dl-val" style="color:#C97A00">3j restants</span></div></div>
-<div class="ncr-item"><div class="ncr-top"><span class="ncr-id">NCR-013</span><span class="badge bc">Critique</span><span class="badge bt">En traitement</span></div><div class="ncr-desc">Bornage incorrect — CAB-F03</div><div class="ncr-meta">Câbles · Casa-Voyageurs · F · Ouvert par M. Benali le 08-03-2026</div><div class="delai-bar"><span class="dl-label">Délai 5j</span><div class="dl-track"><div class="dl-fill" style="width:100%;background:#D93025"></div></div><span class="dl-val" style="color:#D93025">3j DÉPASSÉ</span></div></div>
-<div class="ncr-item"><div class="ncr-top"><span class="ncr-id">NCR-015</span><span class="badge bm">Mineure</span><span class="badge bv">Levée</span></div><div class="ncr-desc">Étiquette manquante bornier B3 — ARM-G4</div><div class="ncr-meta">Armoire ext. · Ain Sebaa · G · Levée par M. Chakir le 11-03-2026</div><div class="delai-bar"><span class="dl-label">Délai 5j</span><div class="dl-track"><div class="dl-fill" style="width:100%;background:#0D9E5C"></div></div><span class="dl-val" style="color:#0D9E5C">Levée en 1j ✓</span></div></div>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">← Portail</a>
+    <div><div class="tb-title">Module 03 — NCR / Réserves</div><div class="tb-sub">Délai contractuel : 5 jours ouvrables</div></div>
+  </div>
+  <span class="sync-badge" id="sync-badge">⏳ Chargement...</span>
 </div>
-</div></body></html>
+<div class="content">
+  <div class="krow">
+    <div class="ki"><div class="kv kr" id="k-ouv">-</div><div class="kl">Ouvertes</div></div>
+    <div class="ki"><div class="kv ka" id="k-trait">-</div><div class="kl">En traitement</div></div>
+    <div class="ki"><div class="kv kg" id="k-lev">-</div><div class="kl">Levées</div></div>
+    <div class="ki"><div class="kv kr" id="k-dep">-</div><div class="kl">Hors délai</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Réserves — Temps réel Supabase</span>
+    </div>
+    <div id="ncr-list"><div class="loading">⏳ Chargement depuis Supabase...</div></div>
+  </div>
+</div>
+<script>
+var SB_URL='https://kkixktqinfxlkaolslvv.supabase.co';
+var SB_KEY='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+
+function loadNCR(){
+  fetch(SB_URL+'/rest/v1/ncr_reserves?order=created_at.desc&limit=50',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    document.getElementById('sync-badge').textContent='✓ Supabase '+data.length+' NCR';
+    document.getElementById('sync-badge').style.background='rgba(13,158,92,.3)';
+    renderNCR(data);
+  })
+  .catch(function(e){
+    document.getElementById('sync-badge').textContent='⚠ Erreur réseau';
+    document.getElementById('ncr-list').innerHTML='<div class="empty">Impossible de charger les données.<br>Vérifiez votre connexion.</div>';
+  });
+}
+
+function renderNCR(data){
+  var ouv=data.filter(function(n){return n.statut==='Ouverte';}).length;
+  var trait=data.filter(function(n){return n.statut==='En traitement';}).length;
+  var lev=data.filter(function(n){return n.statut==='Levée';}).length;
+  var today=new Date();
+  var dep=data.filter(function(n){
+    if(n.statut==='Levée')return false;
+    var d=new Date(n.created_at);
+    return(today-d)/(1000*60*60*24)>5;
+  }).length;
+  
+  document.getElementById('k-ouv').textContent=ouv;
+  document.getElementById('k-trait').textContent=trait;
+  document.getElementById('k-lev').textContent=lev;
+  document.getElementById('k-dep').textContent=dep;
+  
+  if(data.length===0){
+    document.getElementById('ncr-list').innerHTML='<div class="empty">✅ Aucune NCR ouverte</div>';
+    return;
+  }
+  
+  var html=data.map(function(n){
+    var crit=n.criticite||'Mineure';
+    var st=n.statut||'Ouverte';
+    var critCls=crit==='Critique'?'bc':'bm';
+    var stCls=st==='Levée'?'bv':st==='En traitement'?'bt':'bo';
+    var jours=Math.floor((today-new Date(n.created_at))/(1000*60*60*24));
+    var delaiPct=Math.min(jours/5*100,100);
+    var delaiColor=jours>5?'#D93025':jours>=4?'#C97A00':'#0D9E5C';
+    var delaiTxt=st==='Levée'?'Levée ✓':jours>5?(jours-5)+'j DÉPASSÉ':((5-jours)+'j restant');
+    return '<div class="ncr-item">'+
+      '<div class="ncr-top">'+
+        '<span class="ncr-id">'+(n.titre||'NCR-'+n.id)+'</span>'+
+        '<span class="badge '+critCls+'">'+crit+'</span>'+
+        '<span class="badge '+stCls+'">'+st+'</span>'+
+      '</div>'+
+      '<div class="ncr-desc">'+(n.description||'Non-conformité détectée')+'</div>'+
+      '<div class="ncr-meta">'+(n.equipement||'—')+' · '+(n.gare||'—')+' · '+(n.voie||'—')+' · Ouvert par '+(n.ouvert_par||'—')+'</div>'+
+      '<div class="delai-bar">'+
+        '<span class="dl-label">Délai 5j</span>'+
+        '<div class="dl-track"><div class="dl-fill" style="width:'+delaiPct+'%;background:'+delaiColor+'"></div></div>'+
+        '<span class="dl-val" style="color:'+delaiColor+'">'+delaiTxt+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('ncr-list').innerHTML=html;
+}
+
+loadNCR();
+setInterval(loadNCR, 30000); // Refresh toutes les 30 secondes
+</script>
+</body></html>
