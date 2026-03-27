@@ -214,13 +214,34 @@ function sNCR(id){
   var d=document.getElementById('d'+id).value;
   var a=document.getElementById('a'+id).value;
   var data={leve_par:r,date_cloture:d,action_corrective:a};
-  if(r&&d)data.statut='Levée';
+  var willBeLevee=(r&&d);
+  if(willBeLevee)data.statut='Lev\u00e9e';
+  
+  // Trouver la NCR pour récupérer fiche_vt_id
+  var ncr=ALL.find(function(n){return n.id===id;});
+  
   fetch(SU+'/rest/v1/ncr_reserves?id=eq.'+id,{
     method:'PATCH',
     headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
     body:JSON.stringify(data)
   }).then(function(res){
-    if(res.ok){load();alert('NCR mise a jour'+(r&&d?' - Statut: Levee':''));}
+    if(!res.ok)return;
+    
+    // Si NCR levée ET fiche VT liée → mettre à jour la fiche en Conforme
+    if(willBeLevee && ncr && ncr.fiche_vt_id){
+      return fetch(SU+'/rest/v1/fiches_vt?id=eq.'+ncr.fiche_vt_id,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+        body:JSON.stringify({statut:'Conforme'})
+      });
+    }
+    return Promise.resolve();
+  }).then(function(){
+    load();
+    alert('NCR mise a jour'+(willBeLevee?' - Statut: Levee - Fiche VT mise en Conforme':''));
+  }).catch(function(e){
+    console.error(e);
+    alert('Erreur: '+e.message);
   });
 }
 

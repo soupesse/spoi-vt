@@ -567,24 +567,110 @@ function rHome(){
   }).join('');
 }
 
+var editIdx=-1;
+
 function editFiche(idx){
   var f=S.fiches[idx];
   if(!f||!f.supabase_id)return;
-  var newStatut=prompt('Statut (Conforme/Non-Conforme/En cours): '+f.statut,f.statut);
-  if(!newStatut)return;
-  var newObs=prompt('Observations (actuel: '+f.obs+'):', f.obs||'');
+  editIdx=idx;
+  // Remplir le modal
+  $('em-statut').value=f.statut||'En cours';
+  $('em-c').value=f.c||0;
+  $('em-nc').value=f.nc||0;
+  $('em-na').value=f.na||0;
+  $('em-verif').value=f.verif||'';
+  $('em-obs').value=f.obs||'';
+  $('em-info').textContent='Fiche: '+f.id+' · '+f.equip+' · '+f.gare;
+  $('edit-modal').style.display='flex';
+}
+
+function closeEditModal(){
+  $('edit-modal').style.display='none';
+  editIdx=-1;
+}
+
+function saveEditFiche(){
+  if(editIdx<0)return;
+  var f=S.fiches[editIdx];
+  if(!f||!f.supabase_id)return;
   
+  var oldStatut=f.statut;
+  var newStatut=$('em-statut').value;
+  var newC=parseInt($('em-c').value)||0;
+  var newNC=parseInt($('em-nc').value)||0;
+  var newNA=parseInt($('em-na').value)||0;
+  var newVerif=$('em-verif').value;
+  var newObs=$('em-obs').value;
+  
+  var btn=document.querySelector('#edit-modal button:last-child');
+  btn.textContent='Enregistrement...';
+  btn.disabled=true;
+  
+  // 1. Mettre à jour la fiche dans Supabase
   fetch(SUPABASE_URL+'/rest/v1/fiches_vt?id=eq.'+f.supabase_id,{
     method:'PATCH',
     headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-    body:JSON.stringify({statut:newStatut,observations:newObs||''})
+    body:JSON.stringify({
+      statut:newStatut,
+      nb_points_c:newC,
+      nb_points_nc:newNC,
+      nb_points_na:newNA,
+      verificateur:newVerif,
+      observations:newObs
+    })
   }).then(function(r){
-    if(r.ok){
-      f.statut=newStatut;
-      f.obs=newObs||'';
-      rHome();updKPIs();
-      alert('✓ Fiche modifiée dans Supabase');
+    if(!r.ok)throw new Error('Erreur mise à jour fiche');
+    
+    // 2. Mettre à jour localement
+    f.statut=newStatut;
+    f.c=newC;f.nc=newNC;f.na=newNA;
+    f.verif=newVerif;f.obs=newObs;
+    
+    // 3. Gérer la NCR selon le changement de statut
+    if(oldStatut!=='Non-Conforme' && newStatut==='Non-Conforme'){
+      // Fiche devient NC - creer NCR automatiquement
+      return fetch(SUPABASE_URL+'/rest/v1/ncr_reserves',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+        body:JSON.stringify({
+          fiche_vt_id:f.supabase_id,
+          titre:'NCR-'+f.id,
+          equipement:f.equip,
+          id_terrain:f.terrain,
+          zone:f.zone,
+          gare:f.gare,
+          voie:f.voie,
+          criticite:'Mineure',
+          statut:'Ouverte',
+          description:'Non-conformite detectee - '+newNC+' point(s) NC',
+          ouvert_par:newVerif||f.verif,
+          date_ouverture:f.date
+        })
+      });
+    } else if(oldStatut==='Non-Conforme' && newStatut!=='Non-Conforme'){
+      // Fiche plus NC - lever NCR liee automatiquement
+      return fetch(SUPABASE_URL+'/rest/v1/ncr_reserves?fiche_vt_id=eq.'+f.supabase_id+'&statut=neq.Levee',{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+        body:JSON.stringify({
+          statut:'Levee',
+          action_corrective:'Fiche VT mise à jour - Statut passé à '+newStatut,
+          date_cloture:new Date().toISOString().split('T')[0]
+        })
+      });
     }
+    return Promise.resolve();
+  }).then(function(){
+    closeEditModal();
+    rHome();updKPIs();
+    btn.textContent='Enregistrer';
+    btn.disabled=false;
+    alert('Fiche mise a jour');
+  }).catch(function(e){
+    console.error(e);
+    btn.textContent='Enregistrer';
+    btn.disabled=false;
+    alert('Erreur: '+e.message);
   });
 }
 
@@ -650,5 +736,41 @@ function loadFichesFromSupabase(){
 updateDate();updateNetwork();rEqGrid('');
 loadFichesFromSupabase();
 </script>
+
+<!-- Modal modification fiche VT -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;overflow-y:auto">
+  <div style="background:#fff;border-radius:12px;padding:20px;width:92%;max-width:440px;margin:20px auto">
+    <div style="font-size:16px;font-weight:700;margin-bottom:14px;color:#1A2535">Modifier la fiche VT</div>
+    <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Statut</div>
+    <select id="em-statut" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;margin-bottom:10px;outline:none">
+      <option value="Conforme">Conforme</option>
+      <option value="Non-Conforme">Non-Conforme</option>
+      <option value="En cours">En cours</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Points C</div>
+        <input type="number" id="em-c" min="0" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;outline:none;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Points NC</div>
+        <input type="number" id="em-nc" min="0" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;outline:none;text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Points NA</div>
+        <input type="number" id="em-na" min="0" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;outline:none;text-align:center">
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Vérificateur</div>
+    <input type="text" id="em-verif" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;margin-bottom:10px;outline:none">
+    <div style="font-size:11px;font-weight:700;color:#4A5E74;margin-bottom:4px">Observations</div>
+    <textarea id="em-obs" rows="3" style="width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;margin-bottom:14px;outline:none;resize:none"></textarea>
+    <div style="font-size:11px;color:#7A90A4;margin-bottom:12px" id="em-info"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeEditModal()" style="flex:1;background:#EEF2F7;color:#4A5E74;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer">Annuler</button>
+      <button onclick="saveEditFiche()" style="flex:2;background:#1A6FE8;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Enregistrer</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
