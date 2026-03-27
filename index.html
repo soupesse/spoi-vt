@@ -544,7 +544,74 @@ function save(){
 
 function buildRecap(){var all=[];Object.values(S.equip.dom).forEach(function(a){all=all.concat(a);});var tot=all.length;var nc=Object.values(S.ops).filter(function(v){return v==='NC';}).length;var c=Object.values(S.ops).filter(function(v){return v==='C';}).length;var na=Object.values(S.ops).filter(function(v){return v==='NA';}).length;var stat=nc>0?'Non-Conforme':Object.keys(S.ops).length>0?'Conforme':'En cours';$('recap').innerHTML='<div class="rc-row"><span class="rc-k">Équipement</span><span class="rc-v">'+S.equip.n+'</span></div><div class="rc-row"><span class="rc-k">Localisation</span><span class="rc-v">'+S.gare+' · PK '+S.pk+'</span></div><div class="rc-row"><span class="rc-k">Résultat prévu</span><span class="rc-v" style="color:'+(nc>0?'var(--red)':'var(--green)')+'">'+stat+'</span></div>';}
 function updKPIs(){var td=new Date().toLocaleDateString('fr-FR');var tf=S.fiches.filter(function(f){return f.date===td;});$('kc').textContent=tf.filter(function(f){return f.statut==='Conforme';}).length;$('knc').textContent=tf.filter(function(f){return f.statut==='Non-Conforme';}).length;$('kip').textContent=tf.filter(function(f){return f.statut==='En cours';}).length;}
-function rHome(){var list=$('rlist');var empty=$('empty');if(S.fiches.length===0){list.innerHTML='';empty.style.display='block';return;}empty.style.display='none';list.innerHTML=S.fiches.slice(0,5).map(function(f){var sc=f.statut==='Conforme'?'stc':f.statut==='Non-Conforme'?'stnc':'stip';var pct=f.tot>0?Math.round((f.c+f.nc)/f.tot*100):0;return'<div class="fc"><div class="fc-t"><span class="fc-id">'+f.id+'</span><span class="fc-st '+sc+'">'+f.statut+'</span></div><div class="fc-eq">'+f.equip+' <span style="font-size:11px;font-family:monospace;color:var(--txt2)">'+f.terrain+'</span></div><div class="fc-m">'+f.verif+' · '+f.heure+'</div><div class="fc-loc">'+f.zone+' → '+f.gare+' · Voie '+f.voie+'</div><div class="fc-sync '+(f.synced?'sync-ok':'sync-pend')+'">'+(f.synced?'☁ Synchronisé SharePoint':'📧 En attente d\'envoi email')+'</div><div class="pbar-bg"><div class="pbar-f" style="width:'+pct+'%"></div></div></div>';}).join('');}
+function rHome(){
+  var list=$('rlist');var empty=$('empty');
+  if(S.fiches.length===0){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=S.fiches.slice(0,10).map(function(f,i){
+    var sc=f.statut==='Conforme'?'stc':f.statut==='Non-Conforme'?'stnc':'stip';
+    var pct=f.tot>0?Math.round((f.c+f.nc)/f.tot*100):0;
+    return'<div class="fc">'+
+      '<div class="fc-t"><span class="fc-id">'+f.id+'</span><span class="fc-st '+sc+'">'+f.statut+'</span></div>'+
+      '<div class="fc-eq">'+f.equip+' <span style="font-size:11px;font-family:monospace;color:var(--txt2)">'+f.terrain+'</span></div>'+
+      '<div class="fc-m">'+f.verif+' · '+f.heure+'</div>'+
+      '<div class="fc-loc">'+f.zone+' → '+f.gare+' · Voie '+f.voie+'</div>'+
+      '<div class="fc-sync '+(f.synced?'sync-ok':'sync-pend')+'">'+(f.synced?'☁ Synchronisé Supabase':'⏳ Non synchronisé')+'</div>'+
+      '<div class="pbar-bg"><div class="pbar-f" style="width:'+pct+'%"></div></div>'+
+      (f.supabase_id?
+        '<div style="display:flex;gap:6px;margin-top:8px">'+
+          '<button onclick="editFiche('+i+')" style="flex:1;background:var(--blue-l);color:var(--blue-b);border:1px solid var(--blue);border-radius:6px;padding:5px;font-size:11px;font-weight:700;cursor:pointer">✏ Modifier</button>'+
+          '<button onclick="deleteFiche('+i+')" style="flex:1;background:var(--red-l);color:var(--red-b);border:1px solid var(--red);border-radius:6px;padding:5px;font-size:11px;font-weight:700;cursor:pointer">🗑 Supprimer</button>'+
+        '</div>':'')+
+    '</div>';
+  }).join('');
+}
+
+function editFiche(idx){
+  var f=S.fiches[idx];
+  if(!f||!f.supabase_id)return;
+  var newStatut=prompt('Modifier le statut:
+1. Conforme
+2. Non-Conforme
+3. En cours
+
+Statut actuel: '+f.statut+'
+Entrez le nouveau statut:',f.statut);
+  if(!newStatut)return;
+  var newObs=prompt('Observations (actuel: '+f.obs+'):', f.obs||'');
+  
+  fetch(SUPABASE_URL+'/rest/v1/fiches_vt?id=eq.'+f.supabase_id,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+    body:JSON.stringify({statut:newStatut,observations:newObs||''})
+  }).then(function(r){
+    if(r.ok){
+      f.statut=newStatut;
+      f.obs=newObs||'';
+      rHome();updKPIs();
+      alert('✓ Fiche modifiée dans Supabase');
+    }
+  });
+}
+
+function deleteFiche(idx){
+  var f=S.fiches[idx];
+  if(!f||!f.supabase_id)return;
+  if(!confirm('Supprimer la fiche '+f.id+' ?
+
+Cette action est irréversible.'))return;
+  
+  fetch(SUPABASE_URL+'/rest/v1/fiches_vt?id=eq.'+f.supabase_id,{
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  }).then(function(r){
+    if(r.ok){
+      S.fiches.splice(idx,1);
+      rHome();updKPIs();
+      alert('✓ Fiche supprimée de Supabase');
+    }
+  });
+}
 
 // Charger fiches sauvegardées
 try{var saved=localStorage.getItem('spoi_vt_fiches');if(saved){S.fiches=JSON.parse(saved);updKPIs();}}catch(e){}
