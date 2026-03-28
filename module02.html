@@ -1,18 +1,380 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>SPOI VT — Module 02 · Reporting</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.topbar{background:#4A5E74;padding:10px 16px;display:flex;align-items:center;gap:12px}.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none}.tb-info{color:#fff}.tb-title{font-size:14px;font-weight:700}.tb-sub{font-size:10px;opacity:.7;margin-top:1px}.content{padding:20px;max-width:800px;margin:0 auto}.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:18px;margin-bottom:14px}.card-title{font-size:12px;font-weight:700;color:#7A90A4;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}.doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EEF2F7;cursor:pointer}.doc-item:last-child{border-bottom:none}.doc-icon{font-size:22px;flex-shrink:0}.doc-body{flex:1}.doc-title{font-size:13px;font-weight:700;margin-bottom:2px}.doc-sub{font-size:11px;color:#7A90A4}.doc-formats{display:flex;gap:4px;margin-top:4px}.fmt{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}.fmt-pdf{background:#FEE8E6;color:#B02018}.fmt-xl{background:#E6F9F1;color:#0A7A47}.fmt-docx{background:#EBF2FF;color:#1558C0}.doc-btn{background:#4A5E74;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer}</style></head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Module 02 Reporting</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#4A5E74;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.7)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#fff}
+.dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.content{padding:14px;max-width:900px;margin:0 auto}
+.filters{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:11px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.04em}
+.fs{background:#EEF2F7;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;color:#1A2535;font-size:12px;font-family:inherit;appearance:none;outline:none;min-width:140px}
+.fs:focus{border-color:#1A6FE8}
+.btn-filter{background:#4A5E74;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer}
+.doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.doc-card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.dc-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:12px 12px 0 0}
+.dc-icon{font-size:28px;margin-bottom:8px}
+.dc-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.dc-desc{font-size:11px;color:#7A90A4;line-height:1.5;margin-bottom:10px}
+.dc-ref{font-size:10px;color:#7A90A4;font-style:italic;margin-bottom:10px}
+.dc-btns{display:flex;gap:6px}
+.dc-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid #C8D5E3;background:#EEF2F7;color:#1A2535;font-size:11px;font-weight:700;cursor:pointer}
+.dc-btn:hover{background:#1A6FE8;border-color:#1A6FE8;color:#fff}
+.dc-btn.primary{background:#1A6FE8;border-color:#1558C0;color:#fff}
+.dc-btn.primary:hover{background:#1558C0}
+.fmt-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-right:3px}
+.fmt-pdf{background:#FEE8E6;color:#B02018}
+.fmt-xl{background:#E6F9F1;color:#0A7A47}
+.fmt-docx{background:#EBF2FF;color:#1558C0}
+.stats-bar{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:14px;margin-bottom:14px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.stat{text-align:center}
+.stat-v{font-size:20px;font-weight:700}
+.stat-l{font-size:10px;color:#7A90A4;margin-top:2px}
+.loading{text-align:center;padding:20px;color:#1A6FE8;font-size:13px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A2535;color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:300;transition:transform .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.tg{background:#0D9E5C}
+</style>
+</head>
 <body>
-<div class="topbar"><a class="back-btn" href="https://soupesse.github.io/spoi-vt/portail.html" target="_blank">← Portail</a><div class="tb-info"><div class="tb-title">Module 02 — Reporting & Archives</div><div class="tb-sub">ONCF · CSP Phase 1 · Alstom/Ineo</div></div></div>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Module 02 &mdash; Reporting &amp; Archives</div><div class="tb-s">Export depuis Supabase &middot; Donn&eacute;es r&eacute;elles</div></div>
+  </div>
+  <div class="live"><div class="dot"></div>Supabase</div>
+</div>
+
 <div class="content">
-<div class="card"><div class="card-title">Documents officiels MOA</div>
-<div class="doc-item"><div class="doc-icon">📋</div><div class="doc-body"><div class="doc-title">Cahier VT complet</div><div class="doc-sub">Fiches + pointages + visas · Réf: §3 Note MOA</div><div class="doc-formats"><span class="fmt fmt-pdf">PDF</span><span class="fmt fmt-docx">Word</span><span class="fmt fmt-xl">Excel</span></div></div><button class="doc-btn">Générer</button></div>
-<div class="doc-item"><div class="doc-icon">✅</div><div class="doc-body"><div class="doc-title">Avis d'achèvement VT</div><div class="doc-sub">§1.4.3 Note MOA · Signé MOEI → Agent essais</div><div class="doc-formats"><span class="fmt fmt-pdf">PDF</span><span class="fmt fmt-docx">Word</span></div></div><button class="doc-btn">Générer</button></div>
-<div class="doc-item"><div class="doc-icon">⚠</div><div class="doc-body"><div class="doc-title">Liste des réserves & écarts</div><div class="doc-sub">§3.6 Note MOA · Annexe Cahier VT</div><div class="doc-formats"><span class="fmt fmt-pdf">PDF</span><span class="fmt fmt-xl">Excel</span></div></div><button class="doc-btn">Générer</button></div>
-<div class="doc-item"><div class="doc-icon">📊</div><div class="doc-body"><div class="doc-title">Rapport KPI mensuel</div><div class="doc-sub">MOA/AMO · Taux conformité · Avancement · Jalons</div><div class="doc-formats"><span class="fmt fmt-pdf">PDF</span><span class="fmt fmt-xl">Excel</span></div></div><button class="doc-btn">Générer</button></div>
-<div class="doc-item"><div class="doc-icon">🏆</div><div class="doc-body"><div class="doc-title">Certificat de conformité VT</div><div class="doc-sub">PV VT · Signé MOEI + AMO/MOA</div><div class="doc-formats"><span class="fmt fmt-pdf">PDF</span><span class="fmt fmt-docx">Word</span></div></div><button class="doc-btn">Générer</button></div>
-<div class="doc-item"><div class="doc-icon">🗂</div><div class="doc-body"><div class="doc-title">Relevé matériel (DOE)</div><div class="doc-sub">Dossier des Ouvrages Exécutés ONCF</div><div class="doc-formats"><span class="fmt fmt-xl">Excel</span><span class="fmt fmt-pdf">PDF</span></div></div><button class="doc-btn">Générer</button></div>
+  <!-- Stats bar -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat"><div class="stat-v" id="s-tot" style="color:#1A6FE8">-</div><div class="stat-l">Total VT</div></div>
+    <div class="stat"><div class="stat-v" id="s-conf" style="color:#0D9E5C">-</div><div class="stat-l">Conformes</div></div>
+    <div class="stat"><div class="stat-v" id="s-nc" style="color:#D93025">-</div><div class="stat-l">NC</div></div>
+    <div class="stat"><div class="stat-v" id="s-ncr" style="color:#C97A00">-</div><div class="stat-l">NCR ouvertes</div></div>
+    <div class="stat"><div class="stat-v" id="s-conf-pct" style="color:#0D9E5C">-</div><div class="stat-l">Conformit&eacute;</div></div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <div class="fg"><div class="fl">Zone</div>
+      <select class="fs" id="f-zone">
+        <option value="">Toutes les zones</option>
+        <option>Zone Casablanca</option><option>Zone Rabat</option>
+      </select>
+    </div>
+    <div class="fg"><div class="fl">Gare</div>
+      <select class="fs" id="f-gare">
+        <option value="">Toutes les gares</option>
+        <option>Casa-Port</option><option>Casa-Voyageurs</option>
+        <option>Ain Sebaa</option><option>Roches Noires</option>
+      </select>
+    </div>
+    <div class="fg"><div class="fl">Statut</div>
+      <select class="fs" id="f-statut">
+        <option value="">Tous</option>
+        <option>Conforme</option><option>Non-Conforme</option><option>En cours</option>
+      </select>
+    </div>
+    <button class="btn-filter" onclick="loadData()">Appliquer</button>
+  </div>
+
+  <!-- Documents -->
+  <div class="doc-grid">
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#1A6FE8"></div>
+      <div class="dc-icon">📋</div>
+      <div class="dc-title">Cahier VT complet</div>
+      <div class="dc-desc">Toutes les fiches VT avec r&eacute;sultats r&eacute;els depuis Supabase</div>
+      <div class="dc-ref">&sect;3 Note MOA &middot; Donn&eacute;es temps r&eacute;el</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span><span class="fmt-badge fmt-pdf">PDF</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportCahierVT()">&#11015; Excel</button>
+        <button class="dc-btn" onclick="printCahierVT()">&#128438; Imprimer</button>
+      </div>
+    </div>
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#D93025"></div>
+      <div class="dc-icon">&#9888;</div>
+      <div class="dc-title">Liste des r&eacute;serves</div>
+      <div class="dc-desc">Toutes les NCR avec statuts et actions correctives</div>
+      <div class="dc-ref">&sect;3.6 Note MOA &middot; Annexe Cahier VT</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportNCR()">&#11015; Excel</button>
+        <button class="dc-btn" onclick="printNCR()">&#128438; Imprimer</button>
+      </div>
+    </div>
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#C97A00"></div>
+      <div class="dc-icon">&#128202;</div>
+      <div class="dc-title">Rapport KPI mensuel</div>
+      <div class="dc-desc">Synth&egrave;se KPIs pour MOA/AMO &middot; Donn&eacute;es r&eacute;elles</div>
+      <div class="dc-ref">Destinataire: MOA ONCF &middot; AMO</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportKPI()">&#11015; Excel</button>
+      </div>
+    </div>
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#0D9E5C"></div>
+      <div class="dc-icon">&#128202;</div>
+      <div class="dc-title">Rapport conformit&eacute;</div>
+      <div class="dc-desc">Taux de conformit&eacute; par gare et &eacute;quipement</div>
+      <div class="dc-ref">Analyse d&eacute;taill&eacute;e par zone</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportConformite()">&#11015; Excel</button>
+      </div>
+    </div>
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#6C3FC5"></div>
+      <div class="dc-icon">&#128101;</div>
+      <div class="dc-title">Rapport agents</div>
+      <div class="dc-desc">Charge et performance par agent v&eacute;rificateur</div>
+      <div class="dc-ref">Ops Planning &middot; S#11</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportAgents()">&#11015; Excel</button>
+      </div>
+    </div>
+
+    <div class="doc-card">
+      <div class="dc-stripe" style="background:#4A5E74"></div>
+      <div class="dc-icon">&#128218;</div>
+      <div class="dc-title">Export complet</div>
+      <div class="dc-desc">Toutes les donn&eacute;es Supabase en un seul fichier</div>
+      <div class="dc-ref">Sauvegarde compl&egrave;te</div>
+      <div style="margin-bottom:10px"><span class="fmt-badge fmt-xl">Excel</span></div>
+      <div class="dc-btns">
+        <button class="dc-btn primary" onclick="exportComplet()">&#11015; Export total</button>
+      </div>
+    </div>
+
+  </div>
 </div>
-<div class="card"><div class="card-title">Archives récentes</div>
-<div class="doc-item"><div class="doc-icon">📋</div><div class="doc-body"><div class="doc-title">Cahier VT SP0 — Casa-Port</div><div class="doc-sub">Généré le 15-03-2026 · Final</div></div><button class="doc-btn">⬇ PDF</button></div>
-<div class="doc-item"><div class="doc-icon">✅</div><div class="doc-body"><div class="doc-title">Avis achèvement SP0 — Casa-Port</div><div class="doc-sub">Généré le 15-03-2026 · Final</div></div><button class="doc-btn">⬇ PDF</button></div>
-<div class="doc-item"><div class="doc-icon">📊</div><div class="doc-body"><div class="doc-title">Rapport KPI — Mars 2026</div><div class="doc-sub">Généré le 01-03-2026 · Final</div></div><button class="doc-btn">⬇ PDF</button></div>
-</div>
-</div></body></html>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var DATA={fiches:[],ncrs:[],phases:[],agents:[],affectations:[]};
+
+function toast(msg,cls){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(cls||'');
+  setTimeout(function(){t.classList.add('show');},10);
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+function buildFilter(){
+  var q='?order=created_at.desc';
+  var zone=document.getElementById('f-zone').value;
+  var gare=document.getElementById('f-gare').value;
+  var statut=document.getElementById('f-statut').value;
+  if(zone)q+='&zone=eq.'+encodeURIComponent(zone);
+  if(gare)q+='&gare=eq.'+encodeURIComponent(gare);
+  if(statut)q+='&statut=eq.'+encodeURIComponent(statut);
+  return q;
+}
+
+function loadData(){
+  toast('Chargement depuis Supabase...','');
+  Promise.all([
+    fetch(SU+'/rest/v1/fiches_vt'+buildFilter(),{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/ncr_reserves?order=created_at.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/planning_phases?order=id',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/agents?actif=eq.true',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/affectations?semaine=eq.S%2311',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    DATA.fiches=res[0]||[];
+    DATA.ncrs=res[1]||[];
+    DATA.phases=res[2]||[];
+    DATA.agents=res[3]||[];
+    DATA.affectations=res[4]||[];
+    updateStats();
+    toast('Donnees chargees: '+DATA.fiches.length+' fiches','tg');
+  });
+}
+
+function updateStats(){
+  var f=DATA.fiches;
+  var total=f.length;
+  var conf=f.filter(function(x){return x.statut==='Conforme';}).length;
+  var nc=f.filter(function(x){return x.statut==='Non-Conforme';}).length;
+  var ncrOuv=DATA.ncrs.filter(function(x){return x.statut!=='Levee'&&x.statut!=='Lev\u00e9e';}).length;
+  document.getElementById('s-tot').textContent=total;
+  document.getElementById('s-conf').textContent=conf;
+  document.getElementById('s-nc').textContent=nc;
+  document.getElementById('s-ncr').textContent=ncrOuv;
+  document.getElementById('s-conf-pct').textContent=total?Math.round(conf/total*100)+'%':'-';
+}
+
+function makeWB(sheets){
+  var wb=XLSX.utils.book_new();
+  sheets.forEach(function(s){
+    var ws=XLSX.utils.aoa_to_sheet(s.data);
+    // Style header
+    var range=XLSX.utils.decode_range(ws['!ref']||'A1:A1');
+    for(var c=range.s.c;c<=range.e.c;c++){
+      var addr=XLSX.utils.encode_cell({r:0,c:c});
+      if(!ws[addr])continue;
+      ws[addr].s={font:{bold:true},fill:{fgColor:{rgb:'1A2535'}},alignment:{horizontal:'center'}};
+    }
+    ws['!cols']=s.widths.map(function(w){return{wch:w};});
+    ws['!freeze']={xSplit:0,ySplit:1};
+    XLSX.utils.book_append_sheet(wb,ws,s.name.substring(0,31));
+  });
+  return wb;
+}
+
+// ── CAHIER VT ────────────────────────────────────────────────
+function exportCahierVT(){
+  if(!DATA.fiches.length){toast('Chargez les donnees d abord');return;}
+  var headers=['N Fiche','Equipement','Zone','Gare','Voie','PK','ID Terrain','Verificateur','Statut','Pts C','Pts NC','Pts NA','Total','% Conf','Date','Heure','Observations'];
+  var rows=DATA.fiches.map(function(f){
+    var tot=(f.nb_points_c||0)+(f.nb_points_nc||0)+(f.nb_points_na||0);
+    var pct=tot?Math.round((f.nb_points_c||0)/tot*100)+'%':'';
+    return[f.titre||('VT-'+f.id),f.equipement||'',f.zone||'',f.gare||'',f.voie||'',f.pk||'',f.id_terrain||'',f.verificateur||'',f.statut||'',f.nb_points_c||0,f.nb_points_nc||0,f.nb_points_na||0,tot,pct,f.date_fiche||'',f.heure_fiche||'',f.observations||''];
+  });
+  var wb=makeWB([{name:'Fiches_VT',data:[headers,...rows],widths:[12,20,18,16,8,10,12,18,14,8,8,8,8,8,12,8,30]}]);
+  XLSX.writeFile(wb,'CahierVT_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Cahier VT exporte','tg');
+}
+
+// ── NCR ──────────────────────────────────────────────────────
+function exportNCR(){
+  if(!DATA.ncrs.length){toast('Chargez les donnees d abord');return;}
+  var headers=['N NCR','Fiche VT ID','Equipement','ID Terrain','Zone','Gare','Voie','Criticite','Statut','Description','Ouvert par','Date ouv.','Leve par','Date cloture','Action corrective'];
+  var rows=DATA.ncrs.map(function(n){
+    return[n.titre||('NCR-'+n.id),n.fiche_vt_id||'',n.equipement||'',n.id_terrain||'',n.zone||'',n.gare||'',n.voie||'',n.criticite||'',n.statut||'',n.description||'',n.ouvert_par||'',n.date_ouverture||'',n.leve_par||'',n.date_cloture||'',n.action_corrective||''];
+  });
+  var wb=makeWB([{name:'NCR_Reserves',data:[headers,...rows],widths:[10,10,20,12,18,16,8,10,14,40,16,12,16,12,40]}]);
+  XLSX.writeFile(wb,'NCR_Reserves_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Liste NCR exportee','tg');
+}
+
+// ── KPI ──────────────────────────────────────────────────────
+function exportKPI(){
+  var f=DATA.fiches;
+  var total=f.length||1;
+  var conf=f.filter(function(x){return x.statut==='Conforme';}).length;
+  var nc=f.filter(function(x){return x.statut==='Non-Conforme';}).length;
+  var ncrOuv=DATA.ncrs.filter(function(x){return x.statut!=='Levee'&&x.statut!=='Lev\u00e9e';}).length;
+  var ncrCrit=DATA.ncrs.filter(function(x){return x.criticite==='Critique'&&x.statut!=='Levee'&&x.statut!=='Lev\u00e9e';}).length;
+  var totVT=DATA.phases.reduce(function(s,p){return s+p.nb_vt_prevues;},0)||1;
+  var realVT=DATA.phases.reduce(function(s,p){return s+p.nb_vt_realisees;},0);
+  
+  var kpis=[
+    ['KPI','Valeur','Objectif','Statut'],
+    ['Taux de conformite global',Math.round(conf/total*100)+'%','>=80%',conf/total>=0.8?'OK':'A ameliorer'],
+    ['Avancement global',Math.round(realVT/totVT*100)+'%','62%',realVT/totVT>=0.62?'OK':'Retard'],
+    ['Fiches VT realisees',total+' / '+totVT,totVT,''],
+    ['VT Conformes',conf,'',''],
+    ['VT Non-Conformes',nc,'0',nc===0?'OK':'Action requise'],
+    ['NCR ouvertes',ncrOuv,'0',ncrOuv===0?'OK':'Action requise'],
+    ['NCR critiques ouvertes',ncrCrit,'0',ncrCrit===0?'OK':'URGENT'],
+    ['Date rapport',new Date().toLocaleDateString('fr-FR'),'',''],
+  ];
+  var wb=makeWB([{name:'KPI',data:kpis,widths:[30,14,12,14]}]);
+  XLSX.writeFile(wb,'Rapport_KPI_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Rapport KPI exporte','tg');
+}
+
+// ── CONFORMITE PAR GARE ───────────────────────────────────────
+function exportConformite(){
+  var gares={};
+  DATA.fiches.forEach(function(f){
+    if(!f.gare)return;
+    if(!gares[f.gare])gares[f.gare]={total:0,conf:0,nc:0,equips:{}};
+    gares[f.gare].total++;
+    if(f.statut==='Conforme')gares[f.gare].conf++;
+    if(f.statut==='Non-Conforme')gares[f.gare].nc++;
+    if(f.equipement){
+      if(!gares[f.gare].equips[f.equipement])gares[f.gare].equips[f.equipement]={total:0,conf:0};
+      gares[f.gare].equips[f.equipement].total++;
+      if(f.statut==='Conforme')gares[f.gare].equips[f.equipement].conf++;
+    }
+  });
+  var rows=[['Gare','Total VT','Conformes','NC','Taux conformite']];
+  Object.keys(gares).forEach(function(g){
+    var d=gares[g];
+    rows.push([g,d.total,d.conf,d.nc,d.total?Math.round(d.conf/d.total*100)+'%':'']);
+    Object.keys(d.equips).forEach(function(e){
+      var eq=d.equips[e];
+      rows.push(['  '+e,eq.total,eq.conf,eq.total-eq.conf,eq.total?Math.round(eq.conf/eq.total*100)+'%':'']);
+    });
+  });
+  var wb=makeWB([{name:'Conformite',data:rows,widths:[22,10,10,10,14]}]);
+  XLSX.writeFile(wb,'Conformite_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Rapport conformite exporte','tg');
+}
+
+// ── AGENTS ───────────────────────────────────────────────────
+function exportAgents(){
+  var rows=[['Agent','Role','Max VT/sem','VT S#11','Taux charge','Statut']];
+  DATA.agents.forEach(function(a){
+    var aff=DATA.affectations.find(function(x){return x.id_agent===a.id_agent;});
+    var vt=aff?aff.nb_vt:0;
+    var max=a.max_vt_semaine||10;
+    var taux=Math.round(vt/max*100)+'%';
+    var statut=vt>max?'SURCHARGE':vt>=max*0.9?'Attention':'OK';
+    rows.push([a.nom||'',a.role||'',max,vt,taux,statut]);
+  });
+  var wb=makeWB([{name:'Agents',data:rows,widths:[22,10,12,10,12,12]}]);
+  XLSX.writeFile(wb,'Agents_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Rapport agents exporte','tg');
+}
+
+// ── EXPORT COMPLET ────────────────────────────────────────────
+function exportComplet(){
+  if(!DATA.fiches.length&&!DATA.ncrs.length){toast('Chargez les donnees d abord');return;}
+  
+  var fHeaders=['N Fiche','Equipement','Zone','Gare','Voie','PK','ID Terrain','Verificateur','Statut','Pts C','Pts NC','Pts NA','Date','Heure','Observations'];
+  var fRows=DATA.fiches.map(function(f){return[f.titre||('VT-'+f.id),f.equipement||'',f.zone||'',f.gare||'',f.voie||'',f.pk||'',f.id_terrain||'',f.verificateur||'',f.statut||'',f.nb_points_c||0,f.nb_points_nc||0,f.nb_points_na||0,f.date_fiche||'',f.heure_fiche||'',f.observations||''];});
+  
+  var nHeaders=['N NCR','Equipement','Gare','Criticite','Statut','Description','Ouvert par','Leve par','Action corrective'];
+  var nRows=DATA.ncrs.map(function(n){return[n.titre||('NCR-'+n.id),n.equipement||'',n.gare||'',n.criticite||'',n.statut||'',n.description||'',n.ouvert_par||'',n.leve_par||'',n.action_corrective||''];});
+  
+  var pHeaders=['ID Phase','Libelle','Gare','% Avancement','VT Prevues','VT Realisees','Statut','Responsable'];
+  var pRows=DATA.phases.map(function(p){return[p.id_phase||'',p.libelle||'',p.gare||'',p.pct_avancement||0,p.nb_vt_prevues||0,p.nb_vt_realisees||0,p.statut||'',p.responsable||''];});
+  
+  var wb=makeWB([
+    {name:'Fiches_VT',data:[[...fHeaders],...fRows],widths:[12,20,18,16,8,10,12,18,14,8,8,8,12,8,30]},
+    {name:'NCR_Reserves',data:[[...nHeaders],...nRows],widths:[10,20,16,10,14,40,16,16,40]},
+    {name:'Planning',data:[[...pHeaders],...pRows],widths:[12,34,16,12,10,12,14,18]}
+  ]);
+  XLSX.writeFile(wb,'Export_Complet_SPOI_VT_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Export complet genere','tg');
+}
+
+function printCahierVT(){
+  window.print();
+}
+function printNCR(){
+  window.print();
+}
+
+// Charger au demarrage
+loadData();
+</script>
+</body></html>
