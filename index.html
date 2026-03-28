@@ -713,6 +713,8 @@ function saveEditFiche(){
     }
     return Promise.resolve();
   }).then(function(){
+    var f2=S.fiches[editIdx];
+    logHistorique('fiche_vt', f2.supabase_id, f2.id, 'modification', 'statut', oldStatut, newStatut, 'C:'+newC+' NC:'+newNC+' NA:'+newNA);
     closeEditModal();
     rHome();updKPIs();
     btn.textContent='Enregistrer';
@@ -822,6 +824,27 @@ function loadFichesFromSupabase(){
   });
 }
 updateDate();updateNetwork();rEqGrid('');loadQueue();
+
+function logHistorique(type_entite, entite_id, entite_ref, action, champ, ancienne, nouvelle, details){
+  var user = window.SPOI_USER || {};
+  var data = {
+    type_entite: type_entite,
+    entite_id: entite_id || null,
+    entite_ref: entite_ref || '',
+    action: action,
+    champ_modifie: champ || '',
+    ancienne_valeur: ancienne ? String(ancienne) : '',
+    nouvelle_valeur: nouvelle ? String(nouvelle) : '',
+    utilisateur: user.nom || 'Inconnu',
+    details: details || ''
+  };
+  fetch(SUPABASE_URL+'/rest/v1/historique', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+    body: JSON.stringify(data)
+  }).catch(function(e){ console.log('Historique error:', e); });
+}
+
 loadFichesFromSupabase();
 </script>
 

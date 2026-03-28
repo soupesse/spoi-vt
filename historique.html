@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Historique</title>
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    window.location.href='login.html';return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#1A2535;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.6)}
+.live{display:flex;align-items:center;gap:5px;background:rgba(13,158,92,.25);border:1px solid rgba(13,158,92,.4);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#4ade80}
+.dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.content{padding:14px;max-width:1000px;margin:0 auto}
+.filters{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px;min-width:120px}
+.fl{font-size:10px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.04em}
+.fs{background:#EEF2F7;border:1.5px solid #C8D5E3;border-radius:8px;padding:7px 10px;color:#1A2535;font-size:12px;font-family:inherit;outline:none}
+.fs:focus{border-color:#1A6FE8}
+.btn-f{background:#1A2535;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
+.kv{font-size:20px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
+.kb{color:#1A6FE8}.kg{color:#0D9E5C}.kr{color:#D93025}.ka{color:#C97A00}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card-hdr{padding:10px 16px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:11px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.timeline{padding:0}
+.tl-item{display:flex;gap:14px;padding:12px 16px;border-bottom:1px solid #EEF2F7;position:relative}
+.tl-item:last-child{border-bottom:none}
+.tl-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.ic-creation{background:#E6F9F1}
+.ic-modification{background:#EBF2FF}
+.ic-suppression{background:#FEE8E6}
+.ic-levee{background:#E6F9F1}
+.ic-traitement{background:#FFF4E0}
+.tl-body{flex:1;min-width:0}
+.tl-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.tl-ref{font-size:12px;font-family:monospace;font-weight:700;background:#EEF2F7;padding:2px 8px;border-radius:4px}
+.tl-action{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.ac-creation{background:#E6F9F1;color:#0A7A47}
+.ac-modification{background:#EBF2FF;color:#1558C0}
+.ac-suppression{background:#FEE8E6;color:#B02018}
+.ac-levee{background:#E6F9F1;color:#0A7A47}
+.ac-traitement{background:#FFF4E0;color:#9E5F00}
+.tl-desc{font-size:13px;font-weight:600;margin-bottom:4px;color:#1A2535}
+.tl-detail{font-size:11px;color:#7A90A4;margin-bottom:4px}
+.tl-change{display:flex;align-items:center;gap:6px;font-size:11px;margin-bottom:4px}
+.tl-old{background:#FEE8E6;color:#B02018;padding:2px 8px;border-radius:4px;font-weight:600}
+.tl-arrow{color:#7A90A4;font-size:12px}
+.tl-new{background:#E6F9F1;color:#0A7A47;padding:2px 8px;border-radius:4px;font-weight:600}
+.tl-meta{font-size:10px;color:#7A90A4;display:flex;gap:10px;flex-wrap:wrap}
+.tl-user{font-weight:600;color:#4A5E74}
+.tl-time{color:#7A90A4}
+.tl-type{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px}
+.tt-vt{background:#EBF2FF;color:#1558C0}
+.tt-ncr{background:#FEE8E6;color:#B02018}
+.empty{text-align:center;padding:32px;color:#7A90A4;font-size:13px}
+.loading{text-align:center;padding:20px;color:#1A6FE8;font-size:13px}
+.search-bar{width:100%;background:#EEF2F7;border:1.5px solid #C8D5E3;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;color:#1A2535}
+.search-bar:focus{border-color:#1A6FE8}
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px}
+.pg-btn{background:#EEF2F7;border:1px solid #C8D5E3;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#4A5E74}
+.pg-btn:hover{background:#1A6FE8;border-color:#1A6FE8;color:#fff}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed}
+.pg-info{font-size:12px;color:#7A90A4}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Historique &amp; Tra&ccedil;abilit&eacute;</div><div class="tb-s">Toutes les modifications &middot; Temps r&eacute;el</div></div>
+  </div>
+  <div class="live"><div class="dot"></div>Supabase</div>
+</div>
+
+<div class="content">
+  <div class="krow">
+    <div class="ki"><div class="kv kb" id="k-tot">-</div><div class="kl">Total actions</div></div>
+    <div class="ki"><div class="kv kg" id="k-cre">-</div><div class="kl">Cr&eacute;ations</div></div>
+    <div class="ki"><div class="kv ka" id="k-mod">-</div><div class="kl">Modifications</div></div>
+    <div class="ki"><div class="kv kr" id="k-sup">-</div><div class="kl">Suppressions</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="fg" style="flex:2;min-width:200px">
+      <div class="fl">Recherche</div>
+      <input type="search" class="search-bar" id="f-search" placeholder="Ref fiche, utilisateur, equipement...">
+    </div>
+    <div class="fg">
+      <div class="fl">Type</div>
+      <select class="fs" id="f-type">
+        <option value="">Tous</option>
+        <option value="fiche_vt">Fiches VT</option>
+        <option value="ncr">NCR</option>
+      </select>
+    </div>
+    <div class="fg">
+      <div class="fl">Action</div>
+      <select class="fs" id="f-action">
+        <option value="">Toutes</option>
+        <option value="creation">Cr&eacute;ation</option>
+        <option value="modification">Modification</option>
+        <option value="suppression">Suppression</option>
+        <option value="levee">Lev&eacute;e NCR</option>
+        <option value="traitement">Traitement NCR</option>
+      </select>
+    </div>
+    <div class="fg">
+      <div class="fl">Utilisateur</div>
+      <select class="fs" id="f-user">
+        <option value="">Tous</option>
+        <option>HMIDANI Othmane</option>
+        <option>Issam Elkotb</option>
+        <option>Wadii Kabdani</option>
+        <option>Khalid Ait Said</option>
+        <option>Khalid Zroudi</option>
+      </select>
+    </div>
+    <button class="btn-f" onclick="load()">Filtrer</button>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Journal des modifications</span>
+      <span id="result-count" style="font-size:11px;color:#7A90A4"></span>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="loading">&#9203; Chargement...</div>
+    </div>
+    <div class="pagination" id="pagination" style="display:none">
+      <button class="pg-btn" id="btn-prev" onclick="prevPage()">&#8592; Prec.</button>
+      <span class="pg-info" id="pg-info"></span>
+      <button class="pg-btn" id="btn-next" onclick="nextPage()">Suiv. &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var allData=[];
+var page=0;
+var pageSize=20;
+
+var ICONS={
+  creation:'&#10133;',
+  modification:'&#9998;',
+  suppression:'&#128465;',
+  levee:'&#10003;',
+  traitement:'&#128295;'
+};
+
+function load(){
+  document.getElementById('timeline').innerHTML='<div class="loading">&#9203; Chargement...</div>';
+  var type=document.getElementById('f-type').value;
+  var action=document.getElementById('f-action').value;
+  var user=document.getElementById('f-user').value;
+  
+  var q='/rest/v1/historique?order=created_at.desc&limit=500';
+  if(type)q+='&type_entite=eq.'+encodeURIComponent(type);
+  if(action)q+='&action=eq.'+encodeURIComponent(action);
+  if(user)q+='&utilisateur=eq.'+encodeURIComponent(user);
+  
+  fetch(SU+q,{headers:{'apikey':SK,'Authorization':'Bearer '+SK}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    allData=data||[];
+    page=0;
+    updateKPIs();
+    render();
+  })
+  .catch(function(){
+    document.getElementById('timeline').innerHTML='<div class="empty">Erreur de connexion Supabase</div>';
+  });
+}
+
+function updateKPIs(){
+  document.getElementById('k-tot').textContent=allData.length;
+  document.getElementById('k-cre').textContent=allData.filter(function(d){return d.action==='creation';}).length;
+  document.getElementById('k-mod').textContent=allData.filter(function(d){return d.action==='modification'||d.action==='traitement';}).length;
+  document.getElementById('k-sup').textContent=allData.filter(function(d){return d.action==='suppression';}).length;
+}
+
+function filterData(){
+  var search=document.getElementById('f-search').value.toLowerCase();
+  if(!search)return allData;
+  return allData.filter(function(d){
+    return(d.entite_ref&&d.entite_ref.toLowerCase().indexOf(search)>-1)||
+      (d.utilisateur&&d.utilisateur.toLowerCase().indexOf(search)>-1)||
+      (d.details&&d.details.toLowerCase().indexOf(search)>-1)||
+      (d.ancienne_valeur&&d.ancienne_valeur.toLowerCase().indexOf(search)>-1)||
+      (d.nouvelle_valeur&&d.nouvelle_valeur.toLowerCase().indexOf(search)>-1);
+  });
+}
+
+function render(){
+  var data=filterData();
+  var total=data.length;
+  var start=page*pageSize;
+  var slice=data.slice(start,start+pageSize);
+  
+  document.getElementById('result-count').textContent=total+' enregistrement(s)';
+  
+  if(!total){
+    document.getElementById('timeline').innerHTML='<div class="empty">Aucune action enregistr&eacute;e</div>';
+    document.getElementById('pagination').style.display='none';
+    return;
+  }
+  
+  var html=slice.map(function(d){
+    var actCls='ac-'+(d.action||'modification');
+    var icCls='ic-'+(d.action||'modification');
+    var typCls=d.type_entite==='ncr'?'tt-ncr':'tt-vt';
+    var typLbl=d.type_entite==='ncr'?'NCR':'Fiche VT';
+    var icon=ICONS[d.action]||'&#9998;';
+    var dt=d.created_at?new Date(d.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';
+    
+    var changeHtml='';
+    if(d.ancienne_valeur||d.nouvelle_valeur){
+      changeHtml='<div class="tl-change">'+
+        (d.ancienne_valeur?'<span class="tl-old">'+d.ancienne_valeur+'</span>':'')+ 
+        (d.ancienne_valeur&&d.nouvelle_valeur?'<span class="tl-arrow">&#8594;</span>':'')+
+        (d.nouvelle_valeur?'<span class="tl-new">'+d.nouvelle_valeur+'</span>':'')+
+      '</div>';
+    }
+    
+    var actionLabel={
+      creation:'Cr&eacute;ation',
+      modification:'Modification',
+      suppression:'Suppression',
+      levee:'Lev&eacute;e NCR',
+      traitement:'Traitement NCR'
+    }[d.action]||(d.action||'');
+    
+    return '<div class="tl-item">'+
+      '<div class="tl-icon '+icCls+'">'+icon+'</div>'+
+      '<div class="tl-body">'+
+        '<div class="tl-top">'+
+          '<span class="tl-ref">'+(d.entite_ref||('ID-'+d.entite_id)||'-')+'</span>'+
+          '<span class="tl-action '+actCls+'">'+actionLabel+'</span>'+
+          '<span class="tl-type '+typCls+'">'+typLbl+'</span>'+
+          (d.champ_modifie?'<span style="font-size:10px;color:#7A90A4">Champ: '+d.champ_modifie+'</span>':'')+
+        '</div>'+
+        (d.details?'<div class="tl-desc">'+d.details+'</div>':'')+
+        changeHtml+
+        '<div class="tl-meta">'+
+          '<span class="tl-user">&#128100; '+(d.utilisateur||'Inconnu')+'</span>'+
+          '<span class="tl-time">&#128336; '+dt+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  
+  document.getElementById('timeline').innerHTML=html;
+  
+  // Pagination
+  var totalPages=Math.ceil(total/pageSize);
+  if(totalPages>1){
+    document.getElementById('pagination').style.display='flex';
+    document.getElementById('pg-info').textContent='Page '+(page+1)+' / '+totalPages+' ('+total+' total)';
+    document.getElementById('btn-prev').disabled=(page===0);
+    document.getElementById('btn-next').disabled=(page>=totalPages-1);
+  }else{
+    document.getElementById('pagination').style.display='none';
+  }
+}
+
+function prevPage(){if(page>0){page--;render();window.scrollTo(0,0);}}
+function nextPage(){page++;render();window.scrollTo(0,0);}
+
+// Recherche en temps reel
+document.getElementById('f-search').addEventListener('input',function(){
+  page=0;render();
+});
+
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>

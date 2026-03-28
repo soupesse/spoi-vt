@@ -217,7 +217,10 @@ function chSt(id,c){
     headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
     body:JSON.stringify({statut:s})
   }).then(function(){
-    for(var i=0;i<ALL.length;i++){if(ALL[i].id===id){ALL[i].statut=s;break;}}
+    var ncr=ALL.find(function(n){return n.id===id;});
+    var oldSt=ncr?ncr.statut:'';
+    if(ncr)ncr.statut=s;
+    logHist(id, ncr?ncr.titre||('NCR-'+id):'NCR-'+id, 'modification', 'statut', oldSt, s, '');
     kpis();render();
   });
 }
@@ -256,6 +259,22 @@ function sNCR(id){
     console.error(e);
     alert('Erreur: '+e.message);
   });
+}
+
+
+function logHist(entite_id, entite_ref, action, champ, ancienne, nouvelle, details){
+  var user = window.SPOI_USER || {};
+  fetch('https://kkixktqinfxlkaolslvv.supabase.co/rest/v1/historique', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':'sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3','Authorization':'Bearer sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3'},
+    body:JSON.stringify({
+      type_entite:'ncr', entite_id:entite_id, entite_ref:entite_ref,
+      action:action, champ_modifie:champ||'',
+      ancienne_valeur:ancienne?String(ancienne):'',
+      nouvelle_valeur:nouvelle?String(nouvelle):'',
+      utilisateur:user.nom||'Inconnu', details:details||''
+    })
+  }).catch(function(){});
 }
 
 load();
