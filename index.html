@@ -441,6 +441,7 @@ function envoyerEmail(){
       f.supabase_id=result[0].id;
       btn.textContent='✓ Enregistré dans Supabase #'+result[0].id;
       btn.style.background='var(--green)';
+      logHistorique('fiche_vt', result[0].id, f.id, 'creation', 'statut', '', f.statut, f.equip+' - '+f.gare+' - '+(f.verif||''));
       rHome();syncPending();
       // Si NC — créer automatiquement une NCR
       if(f.statut==='Non-Conforme'){
