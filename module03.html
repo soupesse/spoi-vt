@@ -51,6 +51,19 @@ body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFo
 .bsave{width:100%;background:#0D9E5C;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
 .empty{text-align:center;padding:32px;color:#7A90A4;font-size:13px}
 </style>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    localStorage.removeItem('spoi_session');
+    window.location.href='login.html';
+    return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
 </head>
 <body>
 <div class="topbar">

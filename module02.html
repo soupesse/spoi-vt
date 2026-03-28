@@ -48,6 +48,19 @@ body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFo
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.tg{background:#0D9E5C}
 </style>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    localStorage.removeItem('spoi_session');
+    window.location.href='login.html';
+    return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
 </head>
 <body>
 <div class="topbar">

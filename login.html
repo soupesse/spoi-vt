@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Connexion</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0F1923 0%,#1A2D4A 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.login-card{background:#fff;border-radius:16px;padding:36px;width:90%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.logo-zone{text-align:center;margin-bottom:28px}
+.logo{width:56px;height:56px;background:#1A6FE8;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;margin:0 auto 12px}
+.app-name{font-size:20px;font-weight:700;color:#1A2535}
+.app-sub{font-size:12px;color:#7A90A4;margin-top:3px}
+.field{margin-bottom:16px}
+.field label{font-size:11px;font-weight:700;color:#4A5E74;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.field input{width:100%;border:1.5px solid #C8D5E3;border-radius:10px;padding:12px 16px;font-size:14px;font-family:inherit;outline:none;color:#1A2535;transition:border .15s}
+.field input:focus{border-color:#1A6FE8;box-shadow:0 0 0 3px #EBF2FF}
+.btn-login{width:100%;background:#1A6FE8;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;transition:background .15s}
+.btn-login:hover{background:#1558C0}
+.btn-login:disabled{background:#C8D5E3;cursor:not-allowed}
+.error{background:#FEE8E6;color:#B02018;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:14px;display:none}
+.error.show{display:block}
+.hint{text-align:center;font-size:11px;color:#7A90A4;margin-top:16px}
+.hint b{color:#1A6FE8}
+.loading-spin{width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.roles-info{background:#EBF2FF;border-radius:8px;padding:12px;margin-top:16px}
+.roles-title{font-size:11px;font-weight:700;color:#1558C0;margin-bottom:6px}
+.role-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#4A5E74;margin-bottom:3px}
+.role-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px}
+.rb-admin{background:#1A2535;color:#fff}
+.rb-resp{background:#1A6FE8;color:#fff}
+.rb-agent{background:#EEF2F7;color:#4A5E74}
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="logo-zone">
+    <div class="logo">VT</div>
+    <div class="app-name">SPOI VT</div>
+    <div class="app-sub">ONCF &middot; CSP Phase 1 &middot; Signalisation</div>
+  </div>
+  
+  <div class="error" id="error-msg"></div>
+  
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="votre@email.com" autocomplete="email">
+  </div>
+  <div class="field">
+    <label>Mot de passe</label>
+    <input type="password" id="password" placeholder="Mot de passe" autocomplete="current-password">
+  </div>
+  
+  <button class="btn-login" id="btn-login" onclick="login()">Se connecter</button>
+  
+  <div class="hint">Mot de passe par d&eacute;faut: <b>Spoi2026!</b></div>
+  
+  <div class="roles-info">
+    <div class="roles-title">Acc&egrave;s par r&ocirc;le</div>
+    <div class="role-row"><span class="role-badge rb-admin">Admin</span> Tous les modules + Admin</div>
+    <div class="role-row"><span class="role-badge rb-resp">Responsable</span> Tous modules sauf Admin</div>
+    <div class="role-row"><span class="role-badge rb-agent">Agent</span> Module 01 uniquement</div>
+  </div>
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+
+// Auto-redirect si deja connecte
+var sess=null;
+try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+if(sess&&sess.expires_at&&new Date(sess.expires_at)>new Date()){
+  window.location.href='portail.html';
+}
+
+document.getElementById('password').addEventListener('keydown',function(e){
+  if(e.key==='Enter')login();
+});
+
+function login(){
+  var email=document.getElementById('email').value.trim();
+  var pwd=document.getElementById('password').value;
+  var err=document.getElementById('error-msg');
+  var btn=document.getElementById('btn-login');
+  
+  if(!email||!pwd){
+    err.textContent='Veuillez remplir tous les champs';
+    err.classList.add('show');return;
+  }
+  
+  btn.innerHTML='<span class="loading-spin"></span>Connexion...';
+  btn.disabled=true;
+  err.classList.remove('show');
+  
+  // Verifier dans Supabase
+  fetch(SU+'/rest/v1/utilisateurs?email=eq.'+encodeURIComponent(email)+'&actif=eq.true',{
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data||!data.length){
+      throw new Error('Email ou mot de passe incorrect');
+    }
+    var user=data[0];
+    // Verification mot de passe simple (en production: hash)
+    if(user.mot_de_passe_hash!==pwd){
+      throw new Error('Email ou mot de passe incorrect');
+    }
+    // Creer session
+    var session={
+      id:'sess_'+Date.now(),
+      utilisateur_id:user.id,
+      email:user.email,
+      nom:user.nom,
+      role:user.role,
+      zone:user.zone||'Toutes',
+      expires_at:new Date(Date.now()+8*3600*1000).toISOString() // 8h
+    };
+    localStorage.setItem('spoi_session',JSON.stringify(session));
+    
+    // Mise a jour derniere connexion
+    fetch(SU+'/rest/v1/utilisateurs?id=eq.'+user.id,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      body:JSON.stringify({derniere_connexion:new Date().toISOString()})
+    });
+    
+    // Redirection selon role
+    if(user.role==='agent'){
+      window.location.href='index.html';
+    }else{
+      window.location.href='portail.html';
+    }
+  })
+  .catch(function(e){
+    err.textContent=e.message||'Erreur de connexion';
+    err.classList.add('show');
+    btn.innerHTML='Se connecter';
+    btn.disabled=false;
+  });
+}
+</script>
+</body>
+</html>

@@ -170,6 +170,19 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 .btn-ol{width:100%;background:transparent;color:var(--txt2);border:2px solid var(--bdr);border-radius:var(--r);padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
 input[type=file]{display:none}
 </style>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    localStorage.removeItem('spoi_session');
+    window.location.href='login.html';
+    return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
 </head>
 <body>
 <div class="app">

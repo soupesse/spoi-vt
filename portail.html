@@ -101,6 +101,19 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 </style>
 </head>
 <body>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    localStorage.removeItem('spoi_session');
+    window.location.href='login.html';
+    return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
 <div class="app">
 <div class="topbar">
   <div class="tb-brand">
@@ -111,8 +124,12 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
   <div class="tb-right">
     <div class="tb-notif" onclick="openModal('alertes')">🔔<div class="notif-dot"></div></div>
     <div class="tb-user">
-      <div class="tb-avatar">HO</div>
-      <div><div style="font-size:12px;color:var(--txt);font-weight:600">HMIDANI Othmane</div><div style="font-size:10px;color:var(--txt3)">Dir. Opérations</div></div>
+      <div class="tb-avatar" id="user-avatar">?</div>
+      <div>
+        <div style="font-size:12px;color:var(--txt);font-weight:600" id="user-nom">Chargement...</div>
+        <div style="font-size:10px;color:var(--txt3)" id="user-role"></div>
+      </div>
+      <button onclick="logout()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--txt2);border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-left:8px">Deconnexion</button>
     </div>
   </div>
 </div>
@@ -199,5 +216,26 @@ var M={
 function openModal(k){var c=M[k];if(!c)return;document.getElementById('m-title').textContent=c.t;document.getElementById('m-sub').textContent=c.s;document.getElementById('m-body').innerHTML=c.r.map(function(r){return'<div class="mrow"><span class="mk">'+r[0]+'</span><span class="mv">'+r[1]+'</span></div>';}).join('');document.getElementById('modal').classList.add('open');}
 </script>
 
+
+<script>
+if(window.SPOI_USER){
+  var u=window.SPOI_USER;
+  var av=document.getElementById('user-avatar');
+  var nom=document.getElementById('user-nom');
+  var role=document.getElementById('user-role');
+  if(av)av.textContent=u.nom?u.nom.split(' ').map(function(w){return w[0];}).slice(0,2).join(''):'?';
+  if(nom)nom.textContent=u.nom||'';
+  if(role)role.textContent=u.role==='admin'?'Administrateur':u.role==='responsable'?'Responsable VT':'Agent terrain';
+  
+  // Masquer Admin si pas admin
+  if(u.role!=='admin'){
+    document.querySelectorAll('a[href="admin.html"]').forEach(function(el){el.style.display='none';});
+  }
+}
+function logout(){
+  localStorage.removeItem('spoi_session');
+  window.location.href='login.html';
+}
+</script>
 </body>
 </html>

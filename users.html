@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Gestion utilisateurs</title>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    window.location.href='login.html';return;
+  }
+  if(sess.role!=='admin'){window.location.href='portail.html';return;}
+  window.SPOI_USER=sess;
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#1A2535;padding:10px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.6)}
+.logout-btn{background:rgba(255,0,0,.2);border:1px solid rgba(255,0,0,.3);color:#fff;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer}
+.content{padding:14px;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:12px 16px;background:#1A2535;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:13px;font-weight:700}
+.add-btn{background:#1A6FE8;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#4A5E74;border-bottom:1px solid #C8D5E3;background:#EEF2F7}
+td{padding:10px 14px;border-bottom:1px solid #EEF2F7;color:#1A2535}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8FAFC}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.rb-admin{background:#1A2535;color:#fff}
+.rb-resp{background:#1A6FE8;color:#fff}
+.rb-agent{background:#EEF2F7;color:#4A5E74}
+.act-badge{background:#E6F9F1;color:#0A7A47;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.inact-badge{background:#FEE8E6;color:#B02018;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.action-btn{background:none;border:1px solid #C8D5E3;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;margin-right:4px}
+.action-btn:hover{background:#1A6FE8;border-color:#1A6FE8;color:#fff}
+.del-btn:hover{background:#D93025;border-color:#D93025;color:#fff}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:90%;max-width:420px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.form-row{margin-bottom:12px}
+.form-row label{font-size:11px;font-weight:700;color:#4A5E74;display:block;margin-bottom:4px;text-transform:uppercase}
+.form-row input,.form-row select{width:100%;border:1.5px solid #C8D5E3;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;outline:none}
+.form-row input:focus,.form-row select:focus{border-color:#1A6FE8}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.btn-save{flex:1;background:#1A6FE8;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-cancel{background:#EEF2F7;color:#4A5E74;border:none;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer}
+.empty{text-align:center;padding:24px;color:#7A90A4}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Gestion des utilisateurs</div><div class="tb-s">Admin uniquement</div></div>
+  </div>
+  <button class="logout-btn" onclick="localStorage.removeItem('spoi_session');window.location.href='login.html'">Deconnexion</button>
+</div>
+<div class="content">
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Utilisateurs SPOI VT</span>
+      <button class="add-btn" onclick="openModal()">+ Nouvel utilisateur</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Nom</th><th>Email</th><th>Role</th><th>Zone</th>
+        <th>Derniere connexion</th><th>Statut</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="user-tbody"><tr><td colspan="7" class="empty">Chargement...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Nouvel utilisateur</h3>
+    <div class="form-row"><label>Nom complet</label><input type="text" id="m-nom" placeholder="Prenom NOM"></div>
+    <div class="form-row"><label>Email</label><input type="email" id="m-email" placeholder="email@alstomgroup.com"></div>
+    <div class="form-row"><label>Mot de passe</label><input type="password" id="m-pwd" placeholder="Mot de passe"></div>
+    <div class="form-row"><label>Role</label>
+      <select id="m-role">
+        <option value="agent">Agent terrain</option>
+        <option value="responsable">Responsable VT</option>
+        <option value="admin">Administrateur</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Zone</label>
+      <select id="m-zone">
+        <option value="Toutes">Toutes les zones</option>
+        <option value="Zone Casablanca">Zone Casablanca</option>
+        <option value="Zone Rabat">Zone Rabat</option>
+        <option value="Zone Kenitra">Zone Kenitra</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="saveUser()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var editId=null;
+
+function load(){
+  fetch(SU+'/rest/v1/utilisateurs?order=role,nom',{
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+  }).then(function(r){return r.json();})
+  .then(function(users){
+    var html=(users||[]).map(function(u){
+      var rc=u.role==='admin'?'rb-admin':u.role==='responsable'?'rb-resp':'rb-agent';
+      var rl=u.role==='admin'?'Admin':u.role==='responsable'?'Responsable':'Agent';
+      var dc=u.derniere_connexion?new Date(u.derniere_connexion).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'Jamais';
+      return '<tr>'+
+        '<td style="font-weight:600">'+u.nom+'</td>'+
+        '<td style="color:#7A90A4">'+u.email+'</td>'+
+        '<td><span class="badge '+rc+'">'+rl+'</span></td>'+
+        '<td>'+(u.zone||'-')+'</td>'+
+        '<td style="font-size:11px;color:#7A90A4">'+dc+'</td>'+
+        '<td>'+(u.actif?'<span class="act-badge">Actif</span>':'<span class="inact-badge">Inactif</span>')+'</td>'+
+        '<td>'+
+          '<button class="action-btn" onclick="editUser('+u.id+')">Modifier</button>'+
+          '<button class="action-btn del-btn" onclick="toggleUser('+u.id+','+u.actif+')">'+
+            (u.actif?'Desactiver':'Activer')+'</button>'+
+        '</td>'+
+      '</tr>';
+    }).join('');
+    document.getElementById('user-tbody').innerHTML=html||'<tr><td colspan="7" class="empty">Aucun utilisateur</td></tr>';
+  });
+}
+
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modal-title').textContent=id?'Modifier utilisateur':'Nouvel utilisateur';
+  if(!id){
+    document.getElementById('m-nom').value='';
+    document.getElementById('m-email').value='';
+    document.getElementById('m-pwd').value='';
+    document.getElementById('m-role').value='agent';
+    document.getElementById('m-zone').value='Toutes';
+  }
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');editId=null;}
+
+function editUser(id){
+  fetch(SU+'/rest/v1/utilisateurs?id=eq.'+id,{headers:{'apikey':SK,'Authorization':'Bearer '+SK}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data||!data.length)return;
+    var u=data[0];
+    document.getElementById('m-nom').value=u.nom||'';
+    document.getElementById('m-email').value=u.email||'';
+    document.getElementById('m-pwd').value='';
+    document.getElementById('m-role').value=u.role||'agent';
+    document.getElementById('m-zone').value=u.zone||'Toutes';
+    openModal(id);
+  });
+}
+
+function saveUser(){
+  var nom=document.getElementById('m-nom').value.trim();
+  var email=document.getElementById('m-email').value.trim();
+  var pwd=document.getElementById('m-pwd').value;
+  var role=document.getElementById('m-role').value;
+  var zone=document.getElementById('m-zone').value;
+  if(!nom||!email){alert('Nom et email obligatoires');return;}
+  var data={nom:nom,email:email,role:role,zone:zone,actif:true};
+  if(pwd)data.mot_de_passe_hash=pwd;
+  var method=editId?'PATCH':'POST';
+  var url=SU+'/rest/v1/utilisateurs'+(editId?'?id=eq.'+editId:'');
+  fetch(url,{
+    method:method,
+    headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+    body:JSON.stringify(data)
+  }).then(function(r){
+    if(r.ok){closeModal();load();alert(editId?'Utilisateur modifie':'Utilisateur cree');}
+    else{alert('Erreur lors de la sauvegarde');}
+  });
+}
+
+function toggleUser(id,actif){
+  if(!confirm((actif?'Desactiver':'Activer')+' cet utilisateur ?'))return;
+  fetch(SU+'/rest/v1/utilisateurs?id=eq.'+id,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+    body:JSON.stringify({actif:!actif})
+  }).then(function(){load();});
+}
+
+load();
+</script>
+</body>
+</html>

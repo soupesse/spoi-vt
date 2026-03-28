@@ -56,6 +56,19 @@ tr:hover td{background:rgba(26,111,232,.05)}
 .sb-fill{height:5px;border-radius:3px}
 .sb-val{font-size:11px;font-weight:700;min-width:36px;text-align:right}
 </style>
+<!-- Auth Guard -->
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    localStorage.removeItem('spoi_session');
+    window.location.href='login.html';
+    return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
 </head>
 <body>
 <div class="topbar">
