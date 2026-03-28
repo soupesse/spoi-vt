@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Mon compte</title>
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    window.location.href='login.html';return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;min-height:100vh}
+.topbar{background:#1A2535;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.6)}
+.logout-btn{background:rgba(255,0,0,.2);border:1px solid rgba(255,0,0,.3);color:#fff;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer}
+.content{padding:20px;max-width:500px;margin:0 auto}
+
+/* Carte profil */
+.profile-card{background:#fff;border:1px solid #C8D5E3;border-radius:16px;padding:24px;margin-bottom:20px;text-align:center}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1A6FE8,#0D9E5C);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 12px}
+.profile-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.profile-email{font-size:12px;color:#7A90A4;margin-bottom:8px}
+.role-badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px}
+.rb-admin{background:#1A2535;color:#fff}
+.rb-responsable{background:#1A6FE8;color:#fff}
+.rb-agent{background:#EEF2F7;color:#4A5E74}
+.profile-meta{margin-top:12px;font-size:11px;color:#7A90A4;display:flex;justify-content:center;gap:16px}
+
+/* Carte MDP */
+.pwd-card{background:#fff;border:1px solid #C8D5E3;border-radius:16px;padding:24px;margin-bottom:20px}
+.card-title{font-size:14px;font-weight:700;margin-bottom:16px;color:#1A2535;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:14px}
+.field label{font-size:11px;font-weight:700;color:#4A5E74;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.pwd-wrap{position:relative}
+.field input{width:100%;border:1.5px solid #C8D5E3;border-radius:10px;padding:11px 40px 11px 14px;font-size:14px;font-family:inherit;outline:none;color:#1A2535;transition:border .15s}
+.field input:focus{border-color:#1A6FE8;box-shadow:0 0 0 3px #EBF2FF}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#7A90A4;font-size:16px;padding:4px}
+.strength-bar{height:4px;border-radius:2px;margin-top:6px;background:#EEF2F7;overflow:hidden;transition:all .3s}
+.strength-fill{height:4px;border-radius:2px;transition:all .3s}
+.strength-label{font-size:10px;font-weight:700;margin-top:3px}
+.rules{background:#F8FAFC;border-radius:8px;padding:10px 14px;margin-bottom:14px}
+.rule{display:flex;align-items:center;gap:6px;font-size:11px;color:#7A90A4;margin-bottom:3px}
+.rule:last-child{margin-bottom:0}
+.rule-icon{font-size:12px}
+.rule.ok{color:#0D9E5C}
+.btn-save{width:100%;background:#1A6FE8;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn-save:hover{background:#1558C0}
+.btn-save:disabled{background:#C8D5E3;cursor:not-allowed}
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-ok{background:#E6F9F1;color:#0A7A47;border:1px solid #B7EDD0}
+.alert-err{background:#FEE8E6;color:#B02018;border:1px solid #F5C6C6}
+.sessions-card{background:#fff;border:1px solid #C8D5E3;border-radius:16px;padding:24px}
+.sess-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #EEF2F7;font-size:12px}
+.sess-item:last-child{border-bottom:none}
+.sess-icon{font-size:18px}
+.sess-info{flex:1}
+.sess-device{font-weight:600}
+.sess-date{color:#7A90A4;font-size:10px}
+.sess-curr{background:#E6F9F1;color:#0A7A47;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.btn-logout-all{background:#FEE8E6;color:#B02018;border:1px solid #F5C6C6;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;margin-top:12px;width:100%}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Mon compte</div><div class="tb-s">Profil &amp; S&eacute;curit&eacute;</div></div>
+  </div>
+  <button class="logout-btn" onclick="localStorage.removeItem('spoi_session');window.location.href='login.html'">D&eacute;connexion</button>
+</div>
+
+<div class="content">
+
+  <!-- Profil -->
+  <div class="profile-card">
+    <div class="avatar" id="av">?</div>
+    <div class="profile-name" id="p-nom">Chargement...</div>
+    <div class="profile-email" id="p-email"></div>
+    <span class="role-badge" id="p-role"></span>
+    <div class="profile-meta">
+      <span>Zone: <b id="p-zone">-</b></span>
+      <span>Session: <b id="p-sess">-</b></span>
+    </div>
+  </div>
+
+  <!-- Changement MDP -->
+  <div class="pwd-card">
+    <div class="card-title">&#128274; Changer le mot de passe</div>
+
+    <div class="alert alert-ok" id="alert-ok">&#10003; Mot de passe modifi&eacute; avec succ&egrave;s !</div>
+    <div class="alert alert-err" id="alert-err"></div>
+
+    <div class="field">
+      <label>Mot de passe actuel</label>
+      <div class="pwd-wrap">
+        <input type="password" id="pwd-old" placeholder="Votre mot de passe actuel" autocomplete="current-password">
+        <button class="eye-btn" onclick="togglePwd('pwd-old',this)">&#128065;</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nouveau mot de passe</label>
+      <div class="pwd-wrap">
+        <input type="password" id="pwd-new" placeholder="Nouveau mot de passe" autocomplete="new-password" oninput="checkStrength(this.value)">
+        <button class="eye-btn" onclick="togglePwd('pwd-new',this)">&#128065;</button>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="str-fill"></div></div>
+      <div class="strength-label" id="str-label"></div>
+    </div>
+
+    <div class="rules" id="rules">
+      <div class="rule" id="r-len"><span class="rule-icon">&#9711;</span> Au moins 8 caract&egrave;res</div>
+      <div class="rule" id="r-maj"><span class="rule-icon">&#9711;</span> Une majuscule</div>
+      <div class="rule" id="r-num"><span class="rule-icon">&#9711;</span> Un chiffre</div>
+      <div class="rule" id="r-spe"><span class="rule-icon">&#9711;</span> Un caract&egrave;re sp&eacute;cial (!@#$...)</div>
+    </div>
+
+    <div class="field">
+      <label>Confirmer le nouveau mot de passe</label>
+      <div class="pwd-wrap">
+        <input type="password" id="pwd-conf" placeholder="Confirmer le mot de passe" autocomplete="new-password">
+        <button class="eye-btn" onclick="togglePwd('pwd-conf',this)">&#128065;</button>
+      </div>
+    </div>
+
+    <button class="btn-save" id="btn-save" onclick="changePwd()">Modifier le mot de passe</button>
+  </div>
+
+  <!-- Sessions -->
+  <div class="sessions-card">
+    <div class="card-title">&#128274; Session active</div>
+    <div class="sess-item">
+      <div class="sess-icon">&#128187;</div>
+      <div class="sess-info">
+        <div class="sess-device">Navigateur web</div>
+        <div class="sess-date" id="sess-date">-</div>
+      </div>
+      <span class="sess-curr">Session actuelle</span>
+    </div>
+    <button class="btn-logout-all" onclick="logoutAll()">&#128274; Terminer toutes les sessions</button>
+  </div>
+
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var user=window.SPOI_USER||{};
+
+// Remplir le profil
+document.getElementById('p-nom').textContent=user.nom||'';
+document.getElementById('p-email').textContent=user.email||'';
+document.getElementById('p-zone').textContent=user.zone||'-';
+var rc=user.role==='admin'?'rb-admin':user.role==='responsable'?'rb-responsable':'rb-agent';
+var rl=user.role==='admin'?'Administrateur':user.role==='responsable'?'Responsable VT':'Agent terrain';
+document.getElementById('p-role').textContent=rl;
+document.getElementById('p-role').className='role-badge '+rc;
+var initials=(user.nom||'?').split(' ').map(function(w){return w[0];}).slice(0,2).join('');
+document.getElementById('av').textContent=initials;
+if(user.expires_at){
+  var exp=new Date(user.expires_at);
+  document.getElementById('p-sess').textContent='Expire '+exp.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sess-date').textContent='Connecte depuis '+new Date(exp.getTime()-8*3600000).toLocaleString('fr-FR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+}
+
+function togglePwd(id,btn){
+  var inp=document.getElementById(id);
+  if(inp.type==='password'){inp.type='text';btn.textContent='X';}
+  else{inp.type='password';btn.innerHTML='&#128065;';}
+}
+
+function checkStrength(pwd){
+  var len=pwd.length>=8;
+  var maj=/[A-Z]/.test(pwd);
+  var num=/[0-9]/.test(pwd);
+  var spe=/[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+  setRule('r-len',len);
+  setRule('r-maj',maj);
+  setRule('r-num',num);
+  setRule('r-spe',spe);
+  var score=[len,maj,num,spe].filter(Boolean).length;
+  var colors=['#D93025','#D93025','#C97A00','#C97A00','#0D9E5C'];
+  var labels=['','Tres faible','Faible','Moyen','Fort'];
+  document.getElementById('str-fill').style.width=(score*25)+'%';
+  document.getElementById('str-fill').style.background=colors[score];
+  document.getElementById('str-label').textContent=score>0?labels[score]:'';
+  document.getElementById('str-label').style.color=colors[score];
+}
+
+function setRule(id,ok){
+  var el=document.getElementById(id);
+  if(ok){el.className='rule ok';el.querySelector('.rule-icon').innerHTML='&#10003;';}
+  else{el.className='rule';el.querySelector('.rule-icon').innerHTML='&#9711;';}
+}
+
+function showAlert(type,msg){
+  document.getElementById('alert-ok').classList.remove('show');
+  document.getElementById('alert-err').classList.remove('show');
+  if(type==='ok'){document.getElementById('alert-ok').classList.add('show');}
+  else{document.getElementById('alert-err').textContent=msg;document.getElementById('alert-err').classList.add('show');}
+}
+
+function changePwd(){
+  var old=document.getElementById('pwd-old').value;
+  var nw=document.getElementById('pwd-new').value;
+  var conf=document.getElementById('pwd-conf').value;
+  var btn=document.getElementById('btn-save');
+
+  if(!old||!nw||!conf){showAlert('err','Tous les champs sont obligatoires');return;}
+  if(nw!==conf){showAlert('err','Les mots de passe ne correspondent pas');return;}
+  if(nw.length<8){showAlert('err','Le mot de passe doit avoir au moins 8 caracteres');return;}
+
+  btn.textContent='Verification...';btn.disabled=true;
+
+  // Verifier l'ancien mot de passe
+  fetch(SU+'/rest/v1/utilisateurs?email=eq.'+encodeURIComponent(user.email)+'&mot_de_passe_hash=eq.'+encodeURIComponent(old),{
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+  }).then(function(r){return r.json();})
+  .then(function(data){
+    if(!data||!data.length){
+      showAlert('err','Mot de passe actuel incorrect');
+      btn.textContent='Modifier le mot de passe';btn.disabled=false;
+      return;
+    }
+    // Mettre a jour le mot de passe
+    return fetch(SU+'/rest/v1/utilisateurs?email=eq.'+encodeURIComponent(user.email),{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      body:JSON.stringify({mot_de_passe_hash:nw})
+    });
+  }).then(function(r){
+    if(!r)return;
+    if(r.ok){
+      showAlert('ok');
+      document.getElementById('pwd-old').value='';
+      document.getElementById('pwd-new').value='';
+      document.getElementById('pwd-conf').value='';
+      checkStrength('');
+    }else{showAlert('err','Erreur lors de la modification');}
+    btn.textContent='Modifier le mot de passe';btn.disabled=false;
+  }).catch(function(){
+    showAlert('err','Erreur de connexion');
+    btn.textContent='Modifier le mot de passe';btn.disabled=false;
+  });
+}
+
+function logoutAll(){
+  if(!confirm('Terminer toutes les sessions et se deconnecter ?'))return;
+  localStorage.removeItem('spoi_session');
+  window.location.href='login.html';
+}
+</script>
+</body>
+</html>

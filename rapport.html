@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Rapport Hebdomadaire</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  var sess=null;
+  try{sess=JSON.parse(localStorage.getItem('spoi_session'));}catch(e){}
+  if(!sess||!sess.expires_at||new Date(sess.expires_at)<new Date()){
+    window.location.href='login.html';return;
+  }
+  window.SPOI_USER=sess;
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#1A2535;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.6)}
+.content{padding:14px;max-width:900px;margin:0 auto}
+
+/* Sélecteur semaine */
+.week-selector{background:#fff;border:1px solid #C8D5E3;border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.week-btn{background:#EEF2F7;border:1px solid #C8D5E3;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#4A5E74}
+.week-btn:hover{background:#1A2535;color:#fff;border-color:#1A2535}
+.week-curr{background:#1A2535;color:#fff;border-color:#1A2535;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;min-width:140px;text-align:center}
+.week-nav{font-size:18px;cursor:pointer;color:#4A5E74;background:none;border:none;padding:4px 8px}
+
+/* KPIs */
+.krow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.ki::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ki.cg::before{background:#0D9E5C}.ki.cb::before{background:#1A6FE8}
+.ki.cr::before{background:#D93025}.ki.ca::before{background:#C97A00}
+.ki.cp::before{background:#6C3FC5}
+.kv{font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.kl{font-size:10px;color:#7A90A4}
+.kd{font-size:10px;font-weight:700;margin-top:4px}
+.kg{color:#0D9E5C}.kb{color:#1A6FE8}.kr{color:#D93025}.ka{color:#C97A00}.kp{color:#6C3FC5}
+
+/* Rapport */
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:12px 16px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:12px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.report-header{padding:20px;border-bottom:1px solid #EEF2F7}
+.rh-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.rh-sub{font-size:12px;color:#7A90A4;margin-bottom:12px}
+.rh-meta{display:flex;gap:16px;flex-wrap:wrap}
+.rh-tag{background:#EEF2F7;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#4A5E74}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:#4A5E74;border-bottom:1px solid #C8D5E3;background:#EEF2F7;white-space:nowrap}
+td{padding:8px 14px;border-bottom:1px solid #EEF2F7;color:#1A2535}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8FAFC}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px}
+.bc{background:#FEE8E6;color:#B02018}.bm{background:#FFF4E0;color:#9E5F00}
+.bv{background:#E6F9F1;color:#0A7A47}.bw{background:#EBF2FF;color:#1558C0}
+.stc{background:#E6F9F1;color:#0A7A47}.stnc{background:#FEE8E6;color:#B02018}
+.stip{background:#FFF4E0;color:#9E5F00}
+
+/* Exports */
+.export-bar{display:flex;gap:8px;padding:14px 16px;background:#F8FAFC;border-top:1px solid #EEF2F7;flex-wrap:wrap}
+.exp-btn{background:#1A2535;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.exp-btn:hover{background:#4A5E74}
+.exp-btn.green{background:#0D9E5C}.exp-btn.green:hover{background:#0A7A47}
+.exp-btn.blue{background:#1A6FE8}.exp-btn.blue:hover{background:#1558C0}
+
+/* Sections */
+.section-gare{padding:12px 16px;border-bottom:1px solid #EEF2F7}
+.section-gare:last-child{border-bottom:none}
+.sg-name{font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.sg-stats{display:flex;gap:12px;flex-wrap:wrap;font-size:11px}
+.sg-stat{color:#7A90A4}<span style='font-weight:700;color:#1A2535'>val</span>
+.bar-bg{width:80px;height:5px;background:#EEF2F7;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin:0 4px}
+.bar-fill{height:5px;border-radius:3px}
+.empty{text-align:center;padding:20px;color:#7A90A4;font-size:12px}
+.loading{text-align:center;padding:16px;color:#1A6FE8;font-size:12px}
+
+/* Résumé narratif */
+.narrative{background:#EBF2FF;border-radius:10px;padding:16px;margin:14px 16px;font-size:13px;line-height:1.7;color:#1A2535;border-left:4px solid #1A6FE8}
+.narrative b{color:#1558C0}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-l">
+    <a class="back-btn" href="portail.html">&larr; Portail</a>
+    <div><div class="tb-t">Rapport Hebdomadaire</div><div class="tb-s">ONCF &middot; CSP Phase 1 &middot; Signalisation</div></div>
+  </div>
+  <button onclick="localStorage.removeItem('spoi_session');window.location.href='login.html'" style="background:rgba(255,0,0,.2);border:1px solid rgba(255,0,0,.3);color:#fff;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">D&eacute;connexion</button>
+</div>
+
+<div class="content">
+  <!-- Sélecteur semaine -->
+  <div class="week-selector">
+    <button class="week-nav" onclick="changeWeek(-1)">&#8592;</button>
+    <div class="week-curr" id="week-label">Semaine S#XX</div>
+    <button class="week-nav" onclick="changeWeek(1)">&#8594;</button>
+    <button class="week-btn" onclick="goCurrentWeek()">Semaine actuelle</button>
+    <button class="week-btn" onclick="goLastWeek()">Semaine pr&eacute;c&eacute;dente</button>
+    <span id="week-dates" style="font-size:11px;color:#7A90A4;margin-left:auto"></span>
+  </div>
+
+  <!-- KPIs semaine -->
+  <div class="krow">
+    <div class="ki cg"><div class="kv kg" id="k-vt">-</div><div class="kl">VT cette semaine</div><div class="kd kg" id="k-vt-d"></div></div>
+    <div class="ki cg"><div class="kv kg" id="k-conf">-</div><div class="kl">Taux conformit&eacute;</div><div class="kd kg" id="k-conf-d"></div></div>
+    <div class="ki cr"><div class="kv kr" id="k-nc">-</div><div class="kl">Non-conformes</div><div class="kd kr" id="k-nc-d"></div></div>
+    <div class="ki ca"><div class="kv ka" id="k-ncr">-</div><div class="kl">NCR ouvertes</div><div class="kd ka" id="k-ncr-d"></div></div>
+    <div class="ki cp"><div class="kv kp" id="k-av">-</div><div class="kl">Avancement</div><div class="kd kp" id="k-av-d"></div></div>
+  </div>
+
+  <!-- Rapport principal -->
+  <div class="card">
+    <div class="report-header">
+      <div class="rh-title" id="rh-title">Rapport S#XX — ONCF CSP Phase 1</div>
+      <div class="rh-sub">Signalisation ferroviaire &middot; Groupe Alstom/Ineo &middot; March&eacute; N&deg;625C07</div>
+      <div class="rh-meta">
+        <span class="rh-tag">Kénitra–Settat</span>
+        <span class="rh-tag" id="rh-periode">Période: -</span>
+        <span class="rh-tag" id="rh-gen">Généré le: -</span>
+        <span class="rh-tag" id="rh-user">Par: -</span>
+      </div>
+    </div>
+
+    <!-- Résumé narratif -->
+    <div class="narrative" id="narrative">&#9203; Chargement des données...</div>
+
+    <div class="card-hdr" style="margin-top:0">
+      <span class="card-title">Fiches VT de la semaine</span>
+      <span id="vt-week-count" style="font-size:11px;color:#7A90A4"></span>
+    </div>
+    <div id="vt-table-wrap"><div class="loading">Chargement...</div></div>
+
+    <div class="card-hdr">
+      <span class="card-title">Avancement par gare</span>
+    </div>
+    <div id="gare-section"></div>
+
+    <div class="card-hdr">
+      <span class="card-title">NCR de la semaine</span>
+      <span id="ncr-week-count" style="font-size:11px;color:#7A90A4"></span>
+    </div>
+    <div id="ncr-table-wrap"><div class="loading">Chargement...</div></div>
+
+    <div class="export-bar">
+      <span style="font-size:12px;font-weight:700;color:#4A5E74;margin-right:4px">Exporter:</span>
+      <button class="exp-btn green" onclick="exportExcel()">&#11015; Excel</button>
+      <button class="exp-btn blue" onclick="window.print()">&#128438; PDF / Imprimer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+var user=window.SPOI_USER||{};
+var currentWeekOffset=0;
+var DATA={fiches:[],ncrs:[],phases:[]};
+
+// Calcul semaine
+function getWeekDates(offset){
+  var now=new Date();
+  var day=now.getDay()||7;
+  var monday=new Date(now);
+  monday.setDate(now.getDate()-day+1+(offset*7));
+  var sunday=new Date(monday);
+  sunday.setDate(monday.getDate()+6);
+  return{start:monday,end:sunday};
+}
+
+function getWeekNum(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var dayNum=date.getUTCDay()||7;
+  date.setUTCDate(date.getUTCDate()+4-dayNum);
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date-yearStart)/86400000)+1)/7);
+}
+
+function fmtDate(d){return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+
+function updateWeekLabel(){
+  var wd=getWeekDates(currentWeekOffset);
+  var wn=getWeekNum(wd.start);
+  document.getElementById('week-label').textContent='Semaine S#'+String(wn).padStart(2,'0');
+  document.getElementById('week-dates').textContent=fmtDate(wd.start)+' au '+fmtDate(wd.end);
+  document.getElementById('rh-title').textContent='Rapport S#'+String(wn).padStart(2,'0')+' - ONCF CSP Phase 1';
+  document.getElementById('rh-periode').textContent='Période: '+fmtDate(wd.start)+' - '+fmtDate(wd.end);
+  document.getElementById('rh-gen').textContent='Généré le: '+new Date().toLocaleDateString('fr-FR');
+  document.getElementById('rh-user').textContent='Par: '+(user.nom||'');
+  load(wd.start,wd.end);
+}
+
+function changeWeek(dir){currentWeekOffset+=dir;updateWeekLabel();}
+function goCurrentWeek(){currentWeekOffset=0;updateWeekLabel();}
+function goLastWeek(){currentWeekOffset=-1;updateWeekLabel();}
+
+function load(start,end){
+  var s=start.toISOString().split('T')[0];
+  var e=end.toISOString().split('T')[0];
+  
+  Promise.all([
+    fetch(SU+'/rest/v1/fiches_vt?order=created_at.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/ncr_reserves?order=created_at.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/planning_phases?niveau=eq.1',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    var allFiches=res[0]||[];
+    var allNCR=res[1]||[];
+    DATA.phases=res[2]||[];
+    
+    // Filtrer par semaine
+    DATA.fiches=allFiches.filter(function(f){
+      if(!f.date_fiche)return false;
+      var d=new Date(f.date_fiche.split('/').reverse().join('-'));
+      return d>=start&&d<=end;
+    });
+    
+    DATA.ncrs=allNCR.filter(function(n){
+      if(!n.created_at)return false;
+      var d=new Date(n.created_at);
+      return d>=start&&d<=end;
+    });
+    
+    render();
+  });
+}
+
+function render(){
+  var fiches=DATA.fiches;
+  var ncrs=DATA.ncrs;
+  var phases=DATA.phases;
+  
+  var total=fiches.length;
+  var conf=fiches.filter(function(f){return f.statut==='Conforme';}).length;
+  var nc=fiches.filter(function(f){return f.statut==='Non-Conforme';}).length;
+  var pct=total?Math.round(conf/total*100):0;
+  var totVT=phases.reduce(function(s,p){return s+(p.nb_vt_prevues||0);},0)||1;
+  var realVT=phases.reduce(function(s,p){return s+(p.nb_vt_realisees||0);},0);
+  var av=Math.round(realVT/totVT*100);
+  
+  document.getElementById('k-vt').textContent=total;
+  document.getElementById('k-vt-d').textContent=conf+' C + '+nc+' NC';
+  document.getElementById('k-conf').textContent=pct+'%';
+  document.getElementById('k-conf-d').textContent=pct>=80?'Objectif atteint':'Objectif: 80%';
+  document.getElementById('k-nc').textContent=nc;
+  document.getElementById('k-nc-d').textContent=nc===0?'Aucune NC':'Action requise';
+  document.getElementById('k-ncr').textContent=ncrs.filter(function(n){return n.statut!=='Levee'&&n.statut!=='Lev\u00e9e';}).length;
+  document.getElementById('k-ncr-d').textContent=ncrs.filter(function(n){return n.criticite==='Critique';}).length+' critiques';
+  document.getElementById('k-av').textContent=av+'%';
+  document.getElementById('k-av-d').textContent=realVT+'/'+totVT+' VT planif.';
+  
+  // Résumé narratif
+  var wn=document.getElementById('week-label').textContent;
+  var narrative='Au cours de la <b>'+wn+'</b>, l\'équipe a réalisé <b>'+total+' vérifications terrain</b>';
+  if(total===0){
+    narrative='<b>'+wn+'</b> : Aucune fiche VT enregistrée cette semaine.';
+  } else {
+    narrative+=' dont <b>'+conf+' conformes</b> ('+pct+'%) et <b>'+nc+' non-conformes</b>.';
+    if(ncrs.length>0)narrative+=' <b>'+ncrs.length+' réserve(s) NCR</b> ont été ouvertes cette semaine.';
+    narrative+=' L\'avancement global du projet atteint <b>'+av+'%</b> ('+realVT+'/'+totVT+' VT réalisées).';
+    if(pct<80)narrative+=' <b>Taux conformite ('+pct+'%) sous objectif 80%.</b>';
+    else narrative+=' Le taux de conformite est conforme aux objectifs.';
+  }
+  document.getElementById('narrative').innerHTML=narrative;
+  
+  // Table VT
+  document.getElementById('vt-week-count').textContent=total+' fiche(s)';
+  if(!total){
+    document.getElementById('vt-table-wrap').innerHTML='<div class="empty">Aucune fiche VT cette semaine</div>';
+  } else {
+    var html='<table><thead><tr><th>N Fiche</th><th>Equipement</th><th>Gare</th><th>Voie</th><th>Verificateur</th><th>Statut</th><th>Pts C</th><th>Pts NC</th><th>Date</th></tr></thead><tbody>';
+    html+=fiches.map(function(f){
+      var sc=f.statut==='Conforme'?'stc':f.statut==='Non-Conforme'?'stnc':'stip';
+      return'<tr><td style="font-family:monospace;font-weight:600">'+(f.titre||'VT-'+f.id)+'</td>'+
+        '<td>'+(f.equipement||'-')+'</td><td>'+(f.gare||'-')+'</td>'+
+        '<td>'+(f.voie||'-')+'</td><td>'+(f.verificateur||'-')+'</td>'+
+        '<td><span class="badge '+sc+'">'+(f.statut||'-')+'</span></td>'+
+        '<td style="text-align:center">'+(f.nb_points_c||0)+'</td>'+
+        '<td style="text-align:center;color:#D93025;font-weight:'+(f.nb_points_nc>0?'700':'400')+'">'+(f.nb_points_nc||0)+'</td>'+
+        '<td>'+(f.date_fiche||'-')+'</td></tr>';
+    }).join('');
+    html+='</tbody></table>';
+    document.getElementById('vt-table-wrap').innerHTML=html;
+  }
+  
+  // Avancement par gare
+  var gares={};
+  fiches.forEach(function(f){
+    if(!f.gare)return;
+    if(!gares[f.gare])gares[f.gare]={total:0,conf:0,nc:0};
+    gares[f.gare].total++;
+    if(f.statut==='Conforme')gares[f.gare].conf++;
+    if(f.statut==='Non-Conforme')gares[f.gare].nc++;
+  });
+  var gareHtml=Object.keys(gares).map(function(g){
+    var d=gares[g];
+    var pct2=d.total?Math.round(d.conf/d.total*100):0;
+    var color=pct2>=80?'#0D9E5C':pct2>=60?'#C97A00':'#D93025';
+    return'<div class="section-gare">'+
+      '<div class="sg-name">'+g+
+        '<div style="flex:1;height:6px;background:#EEF2F7;border-radius:3px;overflow:hidden;margin:0 8px">'+
+          '<div style="height:6px;border-radius:3px;background:'+color+';width:'+pct2+'%"></div>'+
+        '</div>'+
+        '<span style="font-size:12px;font-weight:700;color:'+color+'">'+pct2+'%</span>'+
+      '</div>'+
+      '<div class="sg-stats">'+
+        '<span>Total: <b>'+d.total+' VT</b></span>'+
+        '<span style="color:#0D9E5C">Conformes: <b>'+d.conf+'</b></span>'+
+        '<span style="color:#D93025">NC: <b>'+d.nc+'</b></span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('gare-section').innerHTML=gareHtml||'<div class="empty">Aucune donnée</div>';
+  
+  // Table NCR
+  document.getElementById('ncr-week-count').textContent=ncrs.length+' NCR';
+  if(!ncrs.length){
+    document.getElementById('ncr-table-wrap').innerHTML='<div class="empty">Aucune NCR cette semaine</div>';
+  } else {
+    var nhtml='<table><thead><tr><th>N NCR</th><th>Equipement</th><th>Gare</th><th>Criticite</th><th>Statut</th><th>Ouvert par</th><th>Date</th></tr></thead><tbody>';
+    nhtml+=ncrs.map(function(n){
+      var cc=n.criticite==='Critique'?'bc':'bm';
+      var sc=n.statut==='Lev\u00e9e'||n.statut==='Levee'?'bv':n.statut==='En traitement'?'bw':'bc';
+      var dt=n.created_at?new Date(n.created_at).toLocaleDateString('fr-FR'):'';
+      return'<tr><td style="font-family:monospace;font-weight:600">'+(n.titre||'NCR-'+n.id)+'</td>'+
+        '<td>'+(n.equipement||'-')+'</td><td>'+(n.gare||'-')+'</td>'+
+        '<td><span class="badge '+cc+'">'+(n.criticite||'-')+'</span></td>'+
+        '<td><span class="badge '+sc+'">'+(n.statut||'-')+'</span></td>'+
+        '<td>'+(n.ouvert_par||'-')+'</td><td>'+dt+'</td></tr>';
+    }).join('');
+    nhtml+='</tbody></table>';
+    document.getElementById('ncr-table-wrap').innerHTML=nhtml;
+  }
+}
+
+function exportExcel(){
+  var wb=XLSX.utils.book_new();
+  var wn=document.getElementById('week-label').textContent;
+  
+  // KPI sheet
+  var kpi=[
+    ['Rapport SPOI VT - '+wn,'','',''],
+    ['ONCF CSP Phase 1 - Signalisation ferroviaire','','',''],
+    ['Marché N°625C07 - Kénitra–Settat','','',''],
+    [''],
+    ['KPI','Valeur','Objectif','Statut'],
+    ['VT réalisées cette semaine',DATA.fiches.length,'',''],
+    ['Taux conformité',DATA.fiches.length?Math.round(DATA.fiches.filter(function(f){return f.statut==='Conforme';}).length/DATA.fiches.length*100)+'%':'','80%',''],
+    ['Non-conformes',DATA.fiches.filter(function(f){return f.statut==='Non-Conforme';}).length,'0',''],
+    ['NCR ouvertes',DATA.ncrs.filter(function(n){return n.statut!=='Levee'&&n.statut!=='Levée';}).length,'0',''],
+    ['Date génération',new Date().toLocaleDateString('fr-FR'),'',''],
+  ];
+  var ws1=XLSX.utils.aoa_to_sheet(kpi);
+  ws1['!cols']=[{wch:30},{wch:14},{wch:12},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws1,'KPI_'+wn.replace('#',''));
+  
+  // VT sheet
+  var vtRows=[['N Fiche','Equipement','Zone','Gare','Voie','Verificateur','Statut','Pts C','Pts NC','Pts NA','Date','Observations']];
+  DATA.fiches.forEach(function(f){
+    vtRows.push([f.titre||('VT-'+f.id),f.equipement||'',f.zone||'',f.gare||'',f.voie||'',f.verificateur||'',f.statut||'',f.nb_points_c||0,f.nb_points_nc||0,f.nb_points_na||0,f.date_fiche||'',f.observations||'']);
+  });
+  var ws2=XLSX.utils.aoa_to_sheet(vtRows);
+  ws2['!cols']=[{wch:12},{wch:20},{wch:18},{wch:16},{wch:7},{wch:18},{wch:14},{wch:7},{wch:7},{wch:7},{wch:12},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Fiches_VT');
+  
+  // NCR sheet
+  var ncrRows=[['N NCR','Equipement','Gare','Criticite','Statut','Description','Ouvert par','Leve par','Action corrective']];
+  DATA.ncrs.forEach(function(n){
+    ncrRows.push([n.titre||('NCR-'+n.id),n.equipement||'',n.gare||'',n.criticite||'',n.statut||'',n.description||'',n.ouvert_par||'',n.leve_par||'',n.action_corrective||'']);
+  });
+  var ws3=XLSX.utils.aoa_to_sheet(ncrRows);
+  ws3['!cols']=[{wch:10},{wch:20},{wch:16},{wch:10},{wch:14},{wch:36},{wch:16},{wch:16},{wch:36}];
+  XLSX.utils.book_append_sheet(wb,ws3,'NCR');
+  
+  var fname='Rapport_'+wn.replace('Semaine ','').replace('#','S').replace(' ','_')+'_ONCF_CSP_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+// Initialiser
+document.getElementById('rh-user').textContent='Par: '+(user.nom||'');
+updateWeekLabel();
+</script>
+</body>
+</html>
