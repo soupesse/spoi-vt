@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPOI VT - Courbe avancement</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F0F4F8;color:#1A2535;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+.topbar{background:#1A2535;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none}
+.tb-t{font-size:14px;font-weight:700;color:#fff}
+.tb-s{font-size:10px;color:rgba(255,255,255,.6)}
+.content{padding:14px;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #C8D5E3;border-radius:12px;margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:12px 16px;background:#EEF2F7;border-bottom:1px solid #C8D5E3;display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:12px;font-weight:700;color:#4A5E74;text-transform:uppercase;letter-spacing:.05em}
+.chart-wrap{padding:16px;position:relative;height:260px}
+canvas{width:100%;height:100%}
+.legend{display:flex;gap:16px;padding:0 16px 14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+.leg-dot{width:10px;height:10px;border-radius:50%}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ki{background:#fff;border:1px solid #C8D5E3;border-radius:10px;padding:12px;text-align:center}
+.kv{font-size:20px;font-weight:700}.kl{font-size:10px;color:#7A90A4;margin-top:2px}
+.kg{color:#0D9E5C}.kb{color:#1A6FE8}.kr{color:#D93025}.ka{color:#C97A00}
+.gare-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #EEF2F7}
+.gare-row:last-child{border-bottom:none}
+.gare-name{flex:1;font-size:13px;font-weight:600}
+.bar-bg{width:120px;height:8px;background:#EEF2F7;border-radius:4px;overflow:hidden}
+.bar-fill{height:8px;border-radius:4px}
+.gare-stats{font-size:11px;color:#7A90A4;min-width:80px;text-align:right}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.alert-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #EEF2F7;font-size:12px}
+.alert-row:last-child{border-bottom:none}
+.alert-icon{font-size:18px;flex-shrink:0}
+.alert-body{flex:1}
+.alert-title{font-weight:700;margin-bottom:2px}
+.alert-sub{font-size:10px;color:#7A90A4}
+.alert-days{font-size:11px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="portail.html">&larr; Portail</a>
+  <div><div class="tb-t">Courbe d'avancement &amp; Alertes jalons</div><div class="tb-s">Donn&eacute;es temps r&eacute;el Supabase</div></div>
+</div>
+<div class="content">
+  <div class="krow">
+    <div class="ki"><div class="kv kb" id="k-av">-</div><div class="kl">Avancement global</div></div>
+    <div class="ki"><div class="kv kg" id="k-conf">-</div><div class="kl">Taux conformit&eacute;</div></div>
+    <div class="ki"><div class="kv kr" id="k-jrisk">-</div><div class="kl">Jalons &agrave; risque</div></div>
+    <div class="ki"><div class="kv ka" id="k-ncr">-</div><div class="kl">NCR ouvertes</div></div>
+  </div>
+  
+  <!-- COURBE D'AVANCEMENT -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Avancement r&eacute;el vs planning contractuel</span>
+      <span id="last-upd" style="font-size:10px;color:#7A90A4"></span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-av"></canvas>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#1A6FE8"></div>Avancement r&eacute;el</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#C8D5E3;border:1px dashed #4A5E74"></div>Planning contractuel</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#0D9E5C"></div>Taux conformit&eacute;</div>
+    </div>
+  </div>
+  
+  <!-- AVANCEMENT PAR GARE -->
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">Avancement par gare</span></div>
+    <div id="gare-list"></div>
+  </div>
+  
+  <!-- ALERTES JALONS -->
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">Alertes jalons</span></div>
+    <div id="jalon-alerts"></div>
+  </div>
+</div>
+
+<script>
+var SU='https://kkixktqinfxlkaolslvv.supabase.co';
+var SK='sb_publishable_S_R-46sE2k9tPsU2yR_xKw_3z4CKYD3';
+
+function load(){
+  Promise.all([
+    fetch(SU+'/rest/v1/fiches_vt?order=created_at',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/planning_phases?niveau=eq.1&order=id',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/jalons?order=date_contractuelle',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();}),
+    fetch(SU+'/rest/v1/ncr_reserves?statut=neq.Levee',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    var fiches=res[0]||[];
+    var phases=res[1]||[];
+    var jalons=res[2]||[];
+    var ncrs=res[3]||[];
+    render(fiches,phases,jalons,ncrs);
+  });
+}
+
+function render(fiches,phases,jalons,ncrs){
+  var total=fiches.length;
+  var conf=fiches.filter(function(f){return f.statut==='Conforme';}).length;
+  var totVT=phases.reduce(function(s,p){return s+p.nb_vt_prevues;},0);
+  var realVT=phases.reduce(function(s,p){return s+p.nb_vt_realisees;},0);
+  var avgAv=totVT?Math.round(realVT/totVT*100):0;
+  var pctConf=total?Math.round(conf/total*100):0;
+  var jRisk=jalons.filter(function(j){return j.statut==='Risque';}).length;
+  
+  document.getElementById('k-av').textContent=avgAv+'%';
+  document.getElementById('k-conf').textContent=pctConf+'%';
+  document.getElementById('k-jrisk').textContent=jRisk;
+  document.getElementById('k-ncr').textContent=ncrs.length;
+  document.getElementById('last-upd').textContent='Mis a jour '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  
+  drawChart(phases,fiches);
+  renderGares(fiches);
+  renderAlerts(jalons);
+}
+
+function drawChart(phases,fiches){
+  var canvas=document.getElementById('chart-av');
+  var ctx=canvas.getContext('2d');
+  var W=canvas.offsetWidth||600;
+  var H=canvas.offsetHeight||220;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  
+  var pad={l:40,r:20,t:20,b:30};
+  var cW=W-pad.l-pad.r;
+  var cH=H-pad.t-pad.b;
+  
+  // Grille
+  ctx.strokeStyle='#EEF2F7';ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){
+    var y=pad.t+cH-(cH*i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    ctx.fillStyle='#7A90A4';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText((i*25)+'%',pad.l-4,y+4);
+  }
+  
+  var n=phases.length;
+  if(!n)return;
+  
+  // Planning contractuel (ligne pointillée)
+  var planData=[0];
+  var cumPlan=0;
+  var totVT=phases.reduce(function(s,p){return s+p.nb_vt_prevues;},0)||1;
+  phases.forEach(function(p){
+    cumPlan+=p.nb_vt_prevues;
+    planData.push(Math.round(cumPlan/totVT*100));
+  });
+  
+  ctx.strokeStyle='#C8D5E3';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+  ctx.beginPath();
+  planData.forEach(function(v,i){
+    var x=pad.l+(cW*i/(planData.length-1||1));
+    var y=pad.t+cH-(cH*v/100);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();ctx.setLineDash([]);
+  
+  // Avancement reel
+  var realData=[0];
+  var cumReal=0;
+  phases.forEach(function(p){
+    cumReal+=p.nb_vt_realisees;
+    realData.push(Math.round(cumReal/totVT*100));
+  });
+  
+  ctx.strokeStyle='#1A6FE8';ctx.lineWidth=3;
+  ctx.beginPath();
+  realData.forEach(function(v,i){
+    var x=pad.l+(cW*i/(realData.length-1||1));
+    var y=pad.t+cH-(cH*v/100);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  
+  // Points
+  realData.forEach(function(v,i){
+    var x=pad.l+(cW*i/(realData.length-1||1));
+    var y=pad.t+cH-(cH*v/100);
+    ctx.fillStyle='#1A6FE8';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+    if(i>0){
+      var ph=phases[i-1];
+      ctx.fillStyle='#4A5E74';ctx.font='9px sans-serif';ctx.textAlign='center';
+      var label=(ph.gare||ph.id_phase||'').substring(0,8);
+      ctx.fillText(label,x,H-pad.b+14);
+    }
+  });
+  
+  // Conformite (zone verte)
+  var total=fiches.length||1;
+  var conf=fiches.filter(function(f){return f.statut==='Conforme';}).length;
+  var pctConf=Math.round(conf/total*100);
+  var yConf=pad.t+cH-(cH*pctConf/100);
+  ctx.strokeStyle='#0D9E5C';ctx.lineWidth=2;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(pad.l,yConf);ctx.lineTo(W-pad.r,yConf);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#0D9E5C';ctx.font='10px sans-serif';ctx.textAlign='left';
+  ctx.fillText('Conf. '+pctConf+'%',W-pad.r-50,yConf-4);
+}
+
+function renderGares(fiches){
+  var gares={};
+  fiches.forEach(function(f){
+    if(!f.gare)return;
+    if(!gares[f.gare])gares[f.gare]={total:0,conf:0,nc:0};
+    gares[f.gare].total++;
+    if(f.statut==='Conforme')gares[f.gare].conf++;
+    if(f.statut==='Non-Conforme')gares[f.gare].nc++;
+  });
+  var html=Object.keys(gares).map(function(g){
+    var d=gares[g];
+    var pct=d.total?Math.round(d.conf/d.total*100):0;
+    var color=pct>=80?'#0D9E5C':pct>=60?'#C97A00':'#D93025';
+    return '<div class="gare-row">'+
+      '<span class="gare-name">'+g+'</span>'+
+      '<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<span style="font-size:11px;font-weight:700;color:'+color+';min-width:36px;text-align:right">'+pct+'%</span>'+
+      '<span class="gare-stats">'+d.total+' VT · '+d.nc+' NC</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('gare-list').innerHTML=html||'<div style="padding:20px;text-align:center;color:#7A90A4">Aucune donnee</div>';
+}
+
+function renderAlerts(jalons){
+  var today=new Date();
+  var alerts=jalons.map(function(j){
+    var d=j.date_contractuelle;
+    var days=j.jours_restants||0;
+    var urgent=days<0;
+    var warn=days>=0&&days<=14;
+    return {j:j,days:days,urgent:urgent,warn:warn};
+  }).filter(function(a){return a.urgent||a.warn;})
+  .sort(function(a,b){return a.days-b.days;});
+  
+  if(!alerts.length){
+    document.getElementById('jalon-alerts').innerHTML='<div style="padding:20px;text-align:center;color:#0D9E5C;font-weight:700">Aucun jalon critique</div>';
+    return;
+  }
+  
+  var html=alerts.map(function(a){
+    var j=a.j;
+    var icon=a.urgent?'🔴':'🟡';
+    var color=a.urgent?'#D93025':'#C97A00';
+    var daysText=a.urgent?Math.abs(a.days)+'j DEPASSE':a.days+'j restants';
+    return '<div class="alert-row">'+
+      '<div class="alert-icon">'+icon+'</div>'+
+      '<div class="alert-body">'+
+        '<div class="alert-title">'+j.libelle+'</div>'+
+        '<div class="alert-sub">'+j.gare+' · '+j.type_jalon+' · Date: '+j.date_contractuelle+'</div>'+
+      '</div>'+
+      '<div class="alert-days" style="color:'+color+'">'+daysText+'</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('jalon-alerts').innerHTML=html;
+}
+
+load();
+setInterval(load,30000);
+</script>
+</body></html>
